@@ -1,0 +1,4 @@
+euo
+===
+
+EasyUO macro
