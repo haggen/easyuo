@@ -1,0 +1,82 @@
+
+set #lpc 50
+
+event exmsg #charid 0 28 From...
+set #targcurs 1
+loop:
+if #targcurs = 1
+  goto loop
+set %source_c #ltargetid
+
+event exmsg #charid 0 28 To...
+set #targcurs 1
+loop:
+if #targcurs = 1
+  goto loop
+set %target_c #ltargetid
+
+; -
+
+finditem * c_ , %source_c
+set %item_n #findcnt
+set %time_n #scnt
+
+while #findindex <= #findcnt
+{
+  event sysmessage #findindex , / , #findcnt
+  set %j #jindex
+  exevent drag #findid #findstack
+  exevent dropc %target_c
+  gosub wait 3
+  
+  gosub has_failed
+  if #result
+    continue
+
+  event property #findid
+  event exmsg #charid 0 28 #property
+  
+  set #findindex #findindex + 1
+}
+
+set %time_n #scnt - %time_n
+event exmsg #charid 0 28 Done %item_n in %time_n sec
+halt
+
+; -
+
+sub wait
+  set %t #scnt2 + %1
+  repeat
+  {
+    wait 1
+  }
+  until #scnt2 >= %t
+  return
+  
+sub journal
+  if %0 < 3
+  {
+    set %3 %2
+    set %2 #jindex
+  }
+  for %i %1 %2
+  {
+    scanjournal %i
+    if %3 in #journal
+      return #true
+  }
+  return #false
+
+sub has_failed
+  gosub journal %j must_wait_to_perform
+  if #result
+    return #true
+  gosub journal %j too_far_away
+  if #result
+    return #true
+  gosub journal %j out_of_sight
+  if #result
+    return #true
+  return #false
+

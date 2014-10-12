@@ -1,0 +1,105 @@
+; Healing with pets v1.0
+; by haggen <arthur@corenzan.com>
+;
+; What does it do ?
+; - call pets to attack you
+; - prevent the player from attacking back
+; - use bandages
+; - pause attack if health is too low
+; - resume when health is back
+;
+; Attention! It is important to have the bandages visible in the client
+; if it's inside a bag, open the bag before starting the script.
+
+; Use bandages when health is below threshold
+set %threshold 90
+
+; Halt attack if health is lower then minimum
+set %minimum 20
+
+; Flags
+set %is_attacking #false
+set %is_healing #false
+set %no_bandages #false
+
+main:
+  if %no_bandages
+    halt
+    
+  if #hits < %minimum && %is_attacking
+    goto halt_attack
+    
+  if #hits < %threshold && ! %is_healing
+    goto heal_self
+    
+  if #hits > %threshold && ! %is_attacking
+    goto call_attack
+      
+  if %is_healing
+  {
+    if #time - %healing_at >= 12 1
+      set %is_healing #false
+  }
+
+  goto main
+
+halt_attack:
+  gosub say all stay
+  set %is_attacking #false
+  goto main
+
+call_attack:
+  gosub say all kill
+  target
+  gosub target_self
+  wait 5
+  gosub toggle_war_twice
+  set %is_attacking #true
+  goto main
+
+heal_self:
+  finditem ZLF C
+
+  if #findcnt > 0
+  {
+    gosub use #findid
+    target
+    gosub target_self
+    set %healing_at #time
+    set %is_healing #true
+  }
+  else
+  {
+    set %no_bandages #true
+    goto halt_attack
+  }
+
+  goto main
+
+; -
+
+sub say
+  set %message
+  for %i 1 %0
+    set %message %message , % . %i , #spc
+  event macro 1 0 %message
+  return
+
+sub toggle_war
+  event macro 6
+  return
+
+sub toggle_war_twice
+  gosub toggle_war
+  wait 10
+  gosub toggle_war
+  return
+
+sub target_self
+  event macro 23
+  return
+  
+sub use
+  set #lobjectid %1
+  event macro 17
+  return
