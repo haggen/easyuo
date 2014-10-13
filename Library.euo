@@ -66,6 +66,6 @@ halt
 ; since last call, in seconds.
 ;
 sub benchmark
-  set !r #scnt2 - !b
-  set !b #scnt2
+  set !r #scnt - !b
+  set !b #scnt
   return !r
