@@ -1,0 +1,93 @@
+; Organizer v1.0.0 2014-10-13 16:05:32 -0300
+; more on github.com/haggen/euo
+;
+; About:
+; ...
+;
+; Depends on:
+; - Library [github.com/haggen/euo/Library.euo]
+;
+
+;::::::::::::::::::::::::::::::::::::::::::::::
+; EDIT THIS SECTION TO CONFIGURE THE HOTKEY!
+;::::::::::::::::::::::::::::::::::::::::::::::
+
+; Change the values below to define your hokey
+
+; CTRL, SHIFT, ALT, or <blank>
+set %mod CTRL
+
+; Any of the following:
+; A-Z, 0-9, F1-F12, ESC, BACK, TAB, ENTER,
+; PAUSE, CAPSLOCK, SPACE, PGDN, PGUP, END,
+; HOME, LEFT, RIGHT, UP, DOWN, PRNSCR,
+; INSERT, DELETE, NUMLOCK or SCROLLLOCK
+set %key O
+
+;::::::::::::::::::::::::::::::::::::::::::::::
+; END OF HOTKEY - DO NOT EDIT BELOW THIS LINE!
+;::::::::::::::::::::::::::::::::::::::::::::::
+
+set #lpc 500
+
+main:
+  onhotkey %key %mod
+    goto organize
+  goto main
+
+organize:
+  event exmsg #charid 0 28 From...
+  set #targcurs 1
+  loop:
+  if #targcurs = 1
+    goto loop
+  set %source_c #ltargetid
+
+  event exmsg #charid 0 28 To...
+  set #targcurs 1
+  loop:
+  if #targcurs = 1
+    goto loop
+  set %target_c #ltargetid
+
+  finditem * c_ , %source_c
+
+  call Library.euo benchmark
+
+  while #findindex <= #findcnt
+  {
+    ; Log what is being moved
+    event property #findid
+    event sysmessage [ , #findindex , / , #findcnt , ] #property
+
+    set %j #jindex
+    exevent drag #findid #findstack
+    exevent dropc %target_c
+    call Library.euo wait 3
+
+    call Library.euo journal %j must_wait_to_perform
+    if #result
+      continue
+
+    call Library.euo journal %j too_far_away
+    if #result
+      goto abort
+
+    call Library.euo journal %j out_of_sight
+    if #result
+      goto abort
+
+    call Library.euo journal %j cannot_do_that
+    if #result
+      goto abort
+
+    set #findindex #findindex + 1
+  }
+
+  call Library.euo benchmark
+  event exmsg #charid 0 28 Moved #findcnt in #result sec
+  goto main
+
+abort:
+  event exmsg #charid 0 28 Aborted
+  goto main
