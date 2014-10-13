@@ -61,9 +61,9 @@ survey:
   if #findcnt = 0
     goto survey
 
-  set %corpse #findid
-  set %started_at #scnt
+  call Library.euo benchmark
 
+  set %corpse #findid
   event exmsg %corpse 0 28 Corpse
 
   set #nextcposx 50
@@ -116,13 +116,9 @@ survey:
   ; lootsack, whilst checking for possible failures
   while #findindex <= #findcnt
   {
-  	; Before moving anything, make 
-  	; sure lootsack is accessible
-  	gosub lootsack
-
   	; Log what is being moved
     event property #findid
-    event sysmessage [#findindex , / , #findcnt] #property
+    event sysmessage [ , #findindex , / , #findcnt , ] #property
 
     set %j #jindex
 
@@ -152,8 +148,8 @@ survey:
     set #findindex #findindex + 1
   }
 
-  set %time #scnt - %started_at
-  event exmsg #charid 0 28 Acquired #findcnt item(s) in %time sec
+  call Library.euo benchmark
+  event exmsg #charid 0 28 Acquired #findcnt item(s) in #result sec
   goto survey
 
 ; 
@@ -161,15 +157,16 @@ halt
 
 ; Find previously selected lootsack, if nothing's found, target a new one
 sub lootsack
-  finditem *lootsack c
+  finditem *lootsack
 
   if #findcnt = 0
   {
+    event exmsg #charid 0 28 Target lootsack
     set #targcurs 1
     loop:
       if #targcurs = 1
         goto loop
-    set *lootbag #ltargetid
+    set *lootsack #ltargetid
   }
   
   return
