@@ -66,6 +66,9 @@ set %loot %loot , OQF_LQF_PRF_KRF_MQF_QRF_RGP_PGP_
 ; END OF LOOT TABLE - DO NOT EDIT BELOW THIS LINE!
 ;::::::::::::::::::::::::::::::::::::::::::::::::::
 
+; Speed things up
+set #lpc 50
+
 ; Make sure a lootsack's been selected
 gosub lootsack
 
