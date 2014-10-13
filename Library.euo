@@ -1,8 +1,11 @@
 ; Library v1.0.0 2014-10-13 11:10:00 -0300
 ; more on github.com/haggen/euo
 ;
+; About:
+; Commonly used subroutines are deferred to this file.
+;
 ; Usage:
-; call Library.euo <subroutine> <arguments>
+; call Library.euo <subroutine> <arguments...>
 ;
 ; Reference:
 ; 1. wait      -> pause execution for given time.
@@ -12,8 +15,8 @@
 
 namespace local Library
 
-; Call given subroutine name,
-; with optional arguments.
+; Call given subroutine name, with
+; following optional arguments.
 set !args
 
 if %0 > 1
@@ -25,6 +28,7 @@ if %0 > 1
 gosub %1 !args
 exit
 
+;
 ; Wait, in tenths of a second.
 ;
 ; %1 -> time to wait
@@ -38,6 +42,7 @@ sub wait
   until #scnt2 >= !w
   return
 
+;
 ; Reads journal between two points, if third
 ; argument is omitted assumes last index and
 ; read string from second argument.
@@ -60,12 +65,13 @@ sub journal
   }
   return #false
 
-halt
-
-; Mark or reckon time passed 
+;
+; Mark or reckon time passed
 ; since last call, in seconds.
 ;
 sub benchmark
   set !r #scnt - !b
   set !b #scnt
   return !r
+
+halt

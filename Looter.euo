@@ -1,20 +1,35 @@
 ; Looter v1.0.1 2014-10-13 11:10:00 -0300
 ; more on github.com/haggen/euo
 ;
+; About:
+; On the first run you'll be asked for a lootsack - the container
+; where the loot will be put into. Then it'll survey the area around
+; you for corpses, up to 2 tiles away. Whenever a corpse is found
+; it'll drag the items that match the loot table into the lootsack.
+; If something prevents the item from being moved (lag, you're dead,
+; etc.) it'll go back to survey mode and try to repeat the procedure.
+; After all the items are moved the corpse will be ignored until the
+; execution is restarted. If the lootsack is unreachable for any
+; reason, you'll be asked to target it again. Consecutive runs will
+; remember a previously selected lootsack.
+;
 ; Depends on:
 ; - Library [github.com/haggen/euo/Library.euo]
 ;
-; Todo:
-; - Beware of your maximum weight
-; - Check if you're already lifting something
+; Knows issues:
+; - Your maximum weight is not being considered
+; - It'll overlap currently lifted items
+;
+; Roadmap:
 ; - Refactor loot table (split into more categories, add missing items)
 ; - Build a menu with checkbox to select loot with ease
 ;
 
-;:::::::::::::::::::::::::::::::::::::::::::::::::::::::
+;::::::::::::::::::::::::::::::::::::::::::::::::
 ; EDIT THIS SECTION TO SELECT THE LOOT YOU WANT!
-; Comment in or out (with a semicolon) the lines below.
-;:::::::::::::::::::::::::::::::::::::::::::::::::::::::
+;::::::::::::::::::::::::::::::::::::::::::::::::
+
+; Comment in/out the lines below with a semicolon.
 
 ; Gold
 set %loot POF_
@@ -51,7 +66,7 @@ set %loot %loot , OQF_LQF_PRF_KRF_MQF_QRF_RGP_PGP_
 ; END OF LOOT TABLE - DO NOT EDIT BELOW THIS LINE!
 ;::::::::::::::::::::::::::::::::::::::::::::::::::
 
-; Make sure there's a lootsack (where loot will be put into)
+; Make sure a lootsack's been selected
 gosub lootsack
 
 ; Look for corpses up to 2 tiles away
@@ -159,10 +174,9 @@ survey:
   event exmsg #charid 0 28 Acquired #findcnt item(s) in #result sec
   goto survey
 
-; 
 halt
 
-; Find previously selected lootsack, if nothing's found, target a new one
+; Find previously selected lootsack, otherwise target a new one
 sub lootsack
   finditem *lootsack
 
@@ -175,7 +189,5 @@ sub lootsack
         goto loop
     set *lootsack #ltargetid
   }
-  
+
   return
-
-
