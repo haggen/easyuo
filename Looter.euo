@@ -100,6 +100,9 @@ survey:
   if #contsize <> 144_212
     goto survey
 
+  ; Make sure there's a lootsack defined and it's accessible
+  gosub lootsack
+
   ; Find loot
   finditem %loot c_ , %corpse
 
