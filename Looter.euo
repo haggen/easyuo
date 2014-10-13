@@ -135,6 +135,10 @@ survey:
     if #result
       continue
 
+    call Library.euo journal %j I_am_dead
+    if #result
+      goto survey
+
     call Library.euo journal %j cannot_do_that
     if #result
       goto survey
