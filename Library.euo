@@ -1,0 +1,71 @@
+; Library v1.0.0 2014-10-13 11:10:00 -0300
+; more on github.com/haggen/euo
+;
+; Usage:
+; call Library.euo <subroutine> <arguments>
+;
+; Reference:
+; 1. wait      -> pause execution for given time.
+; 2. journal   -> scan journal between two indexes.
+; 3. benchmark -> reckon time passed since last call.
+;
+
+namespace local Library
+
+; Call given subroutine name,
+; with optional arguments.
+set !args
+
+if %0 > 1
+{
+  for %i 2 %0
+    set !args % . %i , #spc , !args
+}
+
+gosub %1 !args
+exit
+
+; Wait, in tenths of a second.
+;
+; %1 -> time to wait
+;
+sub wait
+  set !w #scnt2 + %1
+  repeat
+  {
+    wait 1
+  }
+  until #scnt2 >= !w
+  return
+
+; Reads journal between two points, if third
+; argument is omitted assumes last index and
+; read string from second argument.
+;
+; %1 -> starting index
+; %2 -> ending index
+; %3 -> string to search for
+;
+sub journal
+  if %0 < 3
+  {
+    set %3 %2
+    set %2 #jindex
+  }
+  for !i %1 %2
+  {
+    scanjournal !i
+    if %3 in #journal
+      return #true
+  }
+  return #false
+
+halt
+
+; Mark or reckon time passed 
+; since last call, in seconds.
+;
+sub benchmark
+  set !r #scnt2 - !b
+  set !b #scnt2
+  return !r

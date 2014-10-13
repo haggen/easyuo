@@ -1,0 +1,40 @@
+
+;set #lpc 50
+
+set %instruments QRF_NRF_MQF_PRF_LQF_OQF
+
+loop:
+  finditem * G_4
+  
+  set %attacker nil
+  set %victim nil
+
+  while #findindex <= #findcnt
+  {
+    if %attacker <> nil && %victim <> nil
+      goto provoke
+      
+    if #findrep = 3
+    {
+      event exmsg #findid 0 28 Target
+      
+      if %attacker <> nil
+        set %victim #findid
+      else
+        set %attacker #findid
+    }
+      
+    set #findindex #findindex + 1
+  }
+  
+provoke:
+  event macro 13 22
+  target
+  set #ltargetid %attacker
+  event macro 22
+  target
+  set #ltargetid %victim
+  event macro 22
+  call lib wait 80
+  goto loop
+  

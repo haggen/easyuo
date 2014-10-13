@@ -1,0 +1,177 @@
+; Looter v1.0.1 2014-10-13 11:10:00 -0300
+; more on github.com/haggen/euo
+;
+; Depends on:
+; - Library [github.com/haggen/euo/Library.euo]
+;
+; Todo:
+; - Beware of your maximum weight
+; - Check if you're already lifting something
+; - Refactor loot table (split into more categories, add missing items)
+; - Build a menu with checkbox to select loot with ease
+;
+
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::
+; EDIT THIS SECTION TO SELECT THE LOOT YOU WANT!
+; Comment in or out (with a semicolon) the lines below.
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+; Gold
+set %loot POF_
+
+; Magery reagents
+set %loot %loot , KZF_SZF_MZF_JUF_RZF_KUF_WZF_
+
+; Gems, including Arcane Gem
+set %loot %loot , EVF_GVF_ZVF_BVF_RVF_HVF_VVF_JSL_UVF_NVF_
+
+; Bags, backpacks and other containers
+set %loot %loot , ZJF_LKF_CKF_YKK_
+
+; Swords and axes
+set %loot %loot , YPO_BNF_CPH_INF_FSF_OSF_ASF_HNF_FMH_CNF_LSF_NSF_ISF_SMH_RMH_CSF_ZRF_MPH_LPH_MSF_BSF_KPO_GUO_KTF_JTF_BPH_EPH_ZSF_ATF_JPH_SOH_POH_NMH_OMH_LPO_ZTO_XTH_YTH_HSF_KSF_NPO_XPO_FUO_JPO_QPF_NPF_KPH_FYG_RHM_SFR_
+
+; Bows, crossbows and ammunition
+set %loot %loot , WOH_TOH_QPO_SPO_WOH_TOH_JSF_USF_LMH_MMH_QPO_SPO_PPO_RPO_JSF_USF_LMH_MMH_PPO_RPO_JSF_RWF_LNK_FKF_
+
+; Leather and studded leather armors
+set %loot %loot , VKH_NJL_QJL_JKH_QKH_DLH_HKH_PKH_SKH_KKH_ELH_PSF_QSK_ATK_ZSK_OSK_YSK_NSK_
+set %loot %loot , ALH_ULH_LLH_YKH_GLH_XKH_FLH_RLH_MLH_SSK_RSK_
+
+; Platemail
+set %loot %loot , MSH_LSH_NSH_ISH_HSH_KSH_JSH_USH_WSH_ASH_ESH_GSH_OSH_CSH_
+
+; Shields
+set %loot %loot , LIK_MIK_CLK_AIK_CIK_LYD_GIK_NIK_ZHK_HLK_BLK_FIK_BIK_OIK_
+
+; Musical instruments
+set %loot %loot , OQF_LQF_PRF_KRF_MQF_QRF_RGP_PGP_
+
+;::::::::::::::::::::::::::::::::::::::::::::::::::
+; END OF LOOT TABLE - DO NOT EDIT BELOW THIS LINE!
+;::::::::::::::::::::::::::::::::::::::::::::::::::
+
+; Make sure there's a lootsack (where loot will be put into)
+gosub lootsack
+
+; Look for corpses up to 2 tiles away
+survey:
+  finditem YFM_WNF_QNF g_2
+
+  if #findcnt = 0
+    goto survey
+
+  set %corpse #findid
+  set %started_at #scnt
+
+  event exmsg %corpse 0 28 Corpse
+
+  set #nextcposx 50
+  set #nextcposy 50
+
+  ; Open the corpse
+  set %j #jindex
+  set #lobjectid %corpse
+  event macro 17
+  call Library.euo wait 6
+
+  ; Wait till you're alive if you're dead
+  call Library.euo journal %j I_am_dead
+  if #result
+  {
+    repeat
+    {
+      call Library.euo wait 10
+    }
+    until #hits > 0
+  }
+
+  ; Check if we can loot the corpse
+  call Library.euo journal %j criminal_act
+  if #result
+  {
+    event exmsg %corpse 0 28 Nope
+    ignoreitem %corpse
+    goto survey
+  }
+
+  ; If the container size does not match
+  ; a corpse container, look again
+  if #contsize <> 144_212
+    goto survey
+
+  ; Find loot
+  finditem %loot c_ , %corpse
+
+  ; If no selected loot is found,
+  ; mark corpse as empty and move on
+  if #findcnt = 0
+  {
+    event exmsg %corpse 0 28 Empty
+    ignoreitem %corpse
+    goto survey
+  }
+
+  ; For each item found, try to drag it to your
+  ; lootsack, whilst checking for possible failures
+  while #findindex <= #findcnt
+  {
+  	; Before moving anything, make 
+  	; sure lootsack is accessible
+  	gosub lootsack
+
+  	; Log what is being moved
+    event property #findid
+    event sysmessage [#findindex , / , #findcnt] #property
+
+    set %j #jindex
+
+    ; Move the item
+    exevent drag #findid #findstack
+    exevent dropc *lootsack
+    call Library.euo wait 3
+
+    ; Check for failure messages
+    call Library.euo journal %j must_wait_to_perform
+    if #result
+      continue
+
+    call Library.euo journal %j cannot_do_that
+    if #result
+      goto survey
+
+    call Library.euo journal %j too_far_away
+    if #result
+      goto survey
+
+    call Library.euo journal %j out_of_sight
+    if #result
+      goto survey
+
+	; Move on to the next item
+    set #findindex #findindex + 1
+  }
+
+  set %time #scnt - %started_at
+  event exmsg #charid 0 28 Acquired #findcnt item(s) in %time sec
+  goto survey
+
+; 
+halt
+
+; Find previously selected lootsack, if nothing's found, target a new one
+sub lootsack
+  finditem *lootsack c
+
+  if #findcnt = 0
+  {
+    set #targcurs 1
+    loop:
+      if #targcurs = 1
+        goto loop
+    set *lootbag #ltargetid
+  }
+  
+  return
+
+

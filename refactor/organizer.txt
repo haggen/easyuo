@@ -1,4 +1,6 @@
 
+set %loot YPO_BNF_CPH_INF_FSF_OSF_ASF_HNF_FMH_CNF_LSF_NSF_ISF_SMH_RMH_CSF_ZRF_MPH_LPH_MSF_BSF_KPO_GUO_KTF_JTF_BPH_EPH_ZSF_ATF_JPH_SOH_POH_NMH_OMH_LPO_ZTO_XTH_YTH_HSF_KSF_NPO_XPO_FUO_JPO_QPF_NPF_KPH_FYG_RHM_SFR
+
 set #lpc 50
 
 event exmsg #charid 0 28 From...
@@ -17,7 +19,7 @@ set %target_c #ltargetid
 
 ; -
 
-finditem * c_ , %source_c
+finditem %loot c_ , %source_c
 set %item_n #findcnt
 set %time_n #scnt
 
