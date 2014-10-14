@@ -1,0 +1,58 @@
+# [PackageDev] target_format: plist, ext: tmLanguage
+---
+name: EasyUO
+scopeName: source.easyuo
+fileTypes: [euo, txt]
+uuid: f1e7a744-c1f4-4fc4-9ef9-88e0d67a2a76
+
+patterns:
+  - name: 'comment.line.semicolon.euo'
+    match: ';.*'
+
+  - name: 'constant.language.euo'
+    match: '#(spc|dot|smc)\b'
+
+  - name: 'constant.language.boolean.true.euo'
+    match: '#true\b'
+
+  - name: 'constant.language.boolean.false.euo'
+    match: '#false\b'
+
+  - name: 'constant.numeric.euo'
+    match: '[0-9]+'
+
+  - name: 'keyword.control.euo'
+    match: '\b(break|call|continue|exit|for|gosub|goto|halt|if|pause|repeat|until|return|stop|while)\b'
+
+  - name: 'support.function.euo'
+    match: '\b(set|chooseskill|click|cmppix|contpos|deletejournal|finditem|getshopinfo|getuotitle|hideitem|ignoreitem|key|move|msg|nextcpos|onhotkey|savepix|setshopitem|setuotitle|scanjournal|sleep|target|terminate|uoxl|wait|event drag|event exmsg|event macro|event pathfind|event property|event skilllock|event sleep|event sysmessage|exevent drag|exevent dropc|exevent droppd|exevent dropg|exevent popup|exevent renamepet|exevent skilllock|exevent statlock|menu activate|menu button|menu check|menu clear|menu comboto the combobox|menu delete|menu edit|menu font align|menu font bgcolor|menu font color|menu font name|menu font size|menu font style|menu font transparent|menu get|menu getnum|menu hide|menu hideeuo|menu image create|menu image ellipse|menu image file|menu image floodfillimage|menu image line|menu image pix|menu image pixline|menu image pos|menu image rectangle|menu listto the listbox|menu set|menu shape|menu show|menu text|menu window color|menu window size|menu window title|menu window transparent|namespace local|namespace global|namespace clear|namespace push|namespace pop|namespace copy|display|execute|linespercycle|set|send|shutdown|sound|str|tile|deletevar|initevents)\b'
+
+  - name: 'variable.language.euo'
+    match: '#(charposx|charposy|charposz|chardir|charstatus|charid|charghost|backpackid|charname|sex|str|hits|maxhits|dex|stamina|maxstam|int|mana|maxmana|maxstats|luck|weight|maxweight|mindmg|maxdmg|gold|followers|maxfol|ar|fr|cr|pr|er|tp|nextcposx|nextcposy|contsize|contposx|contposy|contkind|contid|conttype|contname|lobjectid|lobjecttype|ltargetid|ltargetx|ltargety|ltargetz|ltargetkind|ltargettile|lliftedid|lliftedtype|lliftedkind|lskill|lspell|findid|findtype|findx|findy|findz|finddist|findkind|findstack|findbagid|findmod|findrep|findcol|findindex|findcnt|shopcurpos|shopcnt|shopitemtype|shopitemid|shopitemname|shopitemprice|shopitemmax|skill|skillcap|skilllock|journal|jindex|jcolor|sysmsg|sysmsgcol|targcurs|curskind|cliver|clicnt|clinr|clixres|cliyres|clileft|clitop|clilogged|lhandid|rhandid|enemyhits|enemyid|nsname|nstype|shard|date|time|systime|scnt|scnt2|pixcol|cursorx|cursory|random|dispres|lshard|osver|euover|menubutton|menures|sendheader|strres|property|result|opts|lpc|tiletype|tilez|tilecnt|tilename|tileflags)\b'
+
+  - name: 'variable.other.euo'
+    match: '(%|!|\*)[a-zA-Z0-9_]+\b'
+
+  - name: 'meta.function.euo'
+    match: '^\s*(sub)\s([a-zA-Z0-9_]+)\b'
+    captures:
+      '1':
+        name: 'entity.name.function.euo'
+      '2':
+        name: 'storage.type.function.euo'
+
+  - name: 'meta.section.euo'
+    match: '^\s*([a-zA-Z0-9_]+):\b'
+    captures:
+      '1':
+        name: 'entity.name.section.euo'
+
+  - name: 'meta.brace.curly.euo'
+    match: '[\{\}]'
+
+  - name: 'meta.brace.round.euo'
+    match: '[\(\)]'
+
+  - name: 'keyword.operator.euo'
+    match: '\s(!|\+|\-|\*|\/|\,|\.|&&|\|\||ABS|%|[<>=]{1,2}|in|notin)\s'
+
