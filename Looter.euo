@@ -18,7 +18,8 @@
 ;
 ; Knows issues:
 ; - Your maximum weight is not being considered
-; - It'll overlap currently lifted items
+; - It'll overlap currently lifted items and that may cause problems
+; - If you run past a corpse real fast, there's a small chance that the client will crash
 ;
 ; Roadmap:
 ; - Refactor loot table (split into more categories, add missing items)
@@ -176,8 +177,6 @@ survey:
   call Library.euo benchmark
   event exmsg #charid 0 28 Acquired #findcnt item(s) in #result sec
   goto survey
-
-halt
 
 ; Find previously selected lootsack, otherwise target a new one
 sub lootsack
