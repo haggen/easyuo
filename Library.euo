@@ -32,20 +32,6 @@ gosub %1 !args
 exit
 
 ;
-; Wait, in tenths of a second.
-;
-; %1 -> time to wait
-;
-sub wait
-  set !w #scnt2 + %1
-  repeat
-  {
-    wait 1
-  }
-  until #scnt2 >= !w
-  return
-
-;
 ; Reads journal between two points, if third
 ; argument is omitted assumes last index and
 ; read string from second argument.
