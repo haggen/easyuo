@@ -1,4 +1,4 @@
-; Looter v1.0.1 2014-10-13 11:10:00 -0300
+; Looter v1.1.0 2014-10-15 23:57:45 -0300
 ; more on github.com/haggen/euo
 ;
 ; About:
@@ -25,6 +25,9 @@
 ; - Build a menu with checkbox to select loot with ease
 ;
 
+; Speed things up
+set #lpc 100
+
 ;::::::::::::::::::::::::::::::::::::::::::::::::
 ; EDIT THIS SECTION TO SELECT THE LOOT YOU WANT!
 ;::::::::::::::::::::::::::::::::::::::::::::::::
@@ -49,8 +52,10 @@ set %loot %loot , YPO_BNF_CPH_INF_FSF_OSF_ASF_HNF_FMH_CNF_LSF_NSF_ISF_SMH_RMH_CS
 ; Bows, crossbows and ammunition
 set %loot %loot , WOH_TOH_QPO_SPO_WOH_TOH_JSF_USF_LMH_MMH_QPO_SPO_PPO_RPO_JSF_USF_LMH_MMH_PPO_RPO_JSF_RWF_LNK_FKF_
 
-; Leather and studded leather armors
+; Leather armor
 set %loot %loot , VKH_NJL_QJL_JKH_QKH_DLH_HKH_PKH_SKH_KKH_ELH_PSF_QSK_ATK_ZSK_OSK_YSK_NSK_
+
+; Studded leather armor
 set %loot %loot , ALH_ULH_LLH_YKH_GLH_XKH_FLH_RLH_MLH_SSK_RSK_
 
 ; Platemail
@@ -66,18 +71,24 @@ set %loot %loot , OQF_LQF_PRF_KRF_MQF_QRF_RGP_PGP_
 ; END OF LOOT TABLE - DO NOT EDIT BELOW THIS LINE!
 ;::::::::::::::::::::::::::::::::::::::::::::::::::
 
-; Speed things up
-set #lpc 50
-
 ; Make sure a lootsack's been selected
 gosub lootsack
+
+; Listen to the hotkey
+idle:
+  wait 10
+  
+loop:
+  onhotkey A CTRL
+    goto survey
+  goto loop
 
 ; Look for corpses up to 2 tiles away
 survey:
   finditem YFM_WNF_QNF g_2
 
   if #findcnt = 0
-    goto survey
+    goto idle
 
   call Library.euo benchmark
 
@@ -91,18 +102,11 @@ survey:
   set %j #jindex
   set #lobjectid %corpse
   event macro 17
-  call Library.euo wait 6
+  wait 10
 
-  ; Wait till you're alive if you're dead
+  ; If you're dead, abort
   call Library.euo journal %j I_am_dead
-  if #result
-  {
-    repeat
-    {
-      call Library.euo wait 10
-    }
-    until #hits > 0
-  }
+    goto idle
 
   ; Check if we can loot the corpse
   call Library.euo journal %j criminal_act
@@ -110,7 +114,7 @@ survey:
   {
     event exmsg %corpse 0 28 Nope
     ignoreitem %corpse
-    goto survey
+    goto idle
   }
 
   ; If the container size does not match
@@ -121,7 +125,8 @@ survey:
   ; Make sure there's a lootsack defined and it's accessible
   gosub lootsack
 
-  ; Find loot
+; Find the loot
+loot:
   finditem %loot c_ , %corpse
 
   ; If no selected loot is found,
@@ -130,14 +135,14 @@ survey:
   {
     event exmsg %corpse 0 28 Empty
     ignoreitem %corpse
-    goto survey
+    goto idle
   }
 
   ; For each item found, try to drag it to your
   ; lootsack, whilst checking for possible failures
   while #findindex <= #findcnt
   {
-  	; Log what is being moved
+    ; Log what is being moved
     event property #findid
     event sysmessage [ , #findindex , / , #findcnt , ] #property
 
@@ -146,7 +151,7 @@ survey:
     ; Move the item
     exevent drag #findid #findstack
     exevent dropc *lootsack
-    call Library.euo wait 3
+    wait 6
 
     ; Check for failure messages
     call Library.euo journal %j must_wait_to_perform
@@ -169,15 +174,15 @@ survey:
     if #result
       goto survey
 
-	; Move on to the next item
+  ; Move on to the next item
     set #findindex #findindex + 1
   }
 
   call Library.euo benchmark
   event exmsg #charid 0 28 Acquired #findcnt item(s) in #result sec
-  goto survey
-
-halt
+  
+  ; Make sure you looted everything
+  goto loot
 
 ; Find previously selected lootsack, otherwise target a new one
 sub lootsack
