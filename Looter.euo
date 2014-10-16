@@ -16,7 +16,7 @@
 ; Depends on:
 ; - Library [github.com/haggen/euo/Library.euo]
 ;
-; Knows issues:
+; Known issues:
 ; - Your maximum weight is not being considered
 ; - It'll overlap currently lifted items and that may cause problems
 ;
