@@ -8,11 +8,14 @@
 ; - Library [github.com/haggen/euo/Library.euo]
 ;
 
-;::::::::::::::::::::::::::::::::::::::::::::::
-; EDIT THIS SECTION TO CONFIGURE THE HOTKEY!
-;::::::::::::::::::::::::::::::::::::::::::::::
+; Speed things up
+set #lpc 100
 
-; Change the values below to define your hokey
+;::::::::::::::::::::::::::::::::::::::::::::::::::::::
+; CONFIGURATION SECTION - DO NOT EDIT ABOVE THIS LINE!
+;::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+; Change the values below to define your hotkey
 
 ; CTRL, SHIFT, ALT, or <blank>
 set %mod CTRL
@@ -24,30 +27,25 @@ set %mod CTRL
 ; INSERT, DELETE, NUMLOCK or SCROLLLOCK
 set %key O
 
-;::::::::::::::::::::::::::::::::::::::::::::::
-; END OF HOTKEY - DO NOT EDIT BELOW THIS LINE!
-;::::::::::::::::::::::::::::::::::::::::::::::
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+; END OF CONFIGURATION SECTION - DO NOT EDIT BELOW THIS LINE!
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-set #lpc 500
+idle:
+  wait 10
 
-main:
+loop:
   onhotkey %key %mod
     goto organize
-  goto main
+  goto loop
 
 organize:
   event exmsg #charid 0 28 From...
-  set #targcurs 1
-  loop:
-  if #targcurs = 1
-    goto loop
+  call Library.euo target
   set %source_c #ltargetid
 
   event exmsg #charid 0 28 To...
-  set #targcurs 1
-  loop:
-  if #targcurs = 1
-    goto loop
+  call Library.euo target
   set %target_c #ltargetid
 
   finditem * c_ , %source_c
@@ -63,7 +61,7 @@ organize:
     set %j #jindex
     exevent drag #findid #findstack
     exevent dropc %target_c
-    call Library.euo wait 3
+    wait 6
 
     call Library.euo journal %j must_wait_to_perform
     if #result
@@ -86,8 +84,8 @@ organize:
 
   call Library.euo benchmark
   event exmsg #charid 0 28 Moved #findcnt in #result sec
-  goto main
+  goto idle
 
 abort:
   event exmsg #charid 0 28 Aborted
-  goto main
+  goto idle
