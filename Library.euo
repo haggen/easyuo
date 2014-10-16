@@ -8,6 +8,9 @@
 ; call Library.euo <subroutine> <arguments...>
 ;
 
+; Speed things up
+set #lpc 100
+
 ; Define namespace
 if #nsname <> Library
 {
