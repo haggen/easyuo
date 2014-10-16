@@ -30,6 +30,7 @@ if %0 > 1
 
 gosub %1 !args
 exit
+halt
 
 ;
 ; Reads journal between two points, if third
@@ -63,4 +64,11 @@ sub benchmark
   set !b #scnt
   return !r
 
-halt
+;
+; Wait for player to target something.
+;
+sub target
+  set #targcurs 1
+  while #targcurs = 1
+    wait 2
+  return
