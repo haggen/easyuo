@@ -28,11 +28,23 @@
 ; Speed things up
 set #lpc 100
 
-;::::::::::::::::::::::::::::::::::::::::::::::::
-; EDIT THIS SECTION TO SELECT THE LOOT YOU WANT!
-;::::::::::::::::::::::::::::::::::::::::::::::::
+;::::::::::::::::::::::::::::::::::::::::::::::::::::::
+; CONFIGURATION SECTION - DO NOT EDIT ABOVE THIS LINE!
+;::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-; Comment in/out the lines below with a semicolon.
+; 1. Change the values below to define your hotkey
+
+; CTRL, SHIFT, ALT, or <blank>
+set %mod CTRL
+
+; Any of the following:
+; A-Z, 0-9, F1-F12, ESC, BACK, TAB, ENTER,
+; PAUSE, CAPSLOCK, SPACE, PGDN, PGUP, END,
+; HOME, LEFT, RIGHT, UP, DOWN, PRNSCR,
+; INSERT, DELETE, NUMLOCK or SCROLLLOCK
+set %key A
+
+; 2. Comment in/out the lines below to select the loot you want
 
 ; Gold
 set %loot POF_
@@ -67,9 +79,9 @@ set %loot %loot , LIK_MIK_CLK_AIK_CIK_LYD_GIK_NIK_ZHK_HLK_BLK_FIK_BIK_OIK_
 ; Musical instruments
 set %loot %loot , OQF_LQF_PRF_KRF_MQF_QRF_RGP_PGP_
 
-;::::::::::::::::::::::::::::::::::::::::::::::::::
-; END OF LOOT TABLE - DO NOT EDIT BELOW THIS LINE!
-;::::::::::::::::::::::::::::::::::::::::::::::::::
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+; END OF CONFIGURATION SECTION - DO NOT EDIT BELOW THIS LINE!
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 ; Make sure a lootsack's been selected
 gosub lootsack
@@ -79,7 +91,7 @@ idle:
   wait 10
   
 loop:
-  onhotkey A CTRL
+  onhotkey %key %mod
     goto survey
   goto loop
 
