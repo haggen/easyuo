@@ -18,7 +18,7 @@
 ;
 ; Knows issues:
 ; - Your maximum weight is not being considered
-; - It'll overlap currently lifted items
+; - It'll overlap currently lifted items and that may cause problems
 ;
 ; Roadmap:
 ; - Refactor loot table (split into more categories, add missing items)
