@@ -1,4 +1,4 @@
-; Library v1.0.0 2014-10-13 11:10:00 -0300
+; Library v1.0.1 2014-10-15 23:12:20 -0300
 ; more on github.com/haggen/euo
 ;
 ; About:
@@ -7,13 +7,13 @@
 ; Usage:
 ; call Library.euo <subroutine> <arguments...>
 ;
-; Reference:
-; 1. wait      -> pause execution for given time.
-; 2. journal   -> scan journal between two indexes.
-; 3. benchmark -> reckon time passed since last call.
-;
 
-namespace local Library
+; Define namespace
+if #nsname <> Library
+{
+  namespace push
+  namespace local Library
+}
 
 ; Call given subroutine name, with
 ; following optional arguments.
