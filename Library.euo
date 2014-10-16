@@ -1,4 +1,4 @@
-; Library v1.0.1 2014-10-15 23:12:20 -0300
+; Library v1.0.3 2014-10-16 00:49:33 -0300
 ; more on github.com/haggen/euo
 ;
 ; About:
@@ -24,8 +24,8 @@ set !args
 
 if %0 > 1
 {
-  for %i 2 %0
-    set !args % . %i , #spc , !args
+  for !i 2 %0
+    set !args % . !i , #spc , !args
 }
 
 gosub %1 !args
