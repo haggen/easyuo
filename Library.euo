@@ -1,4 +1,4 @@
-; Library v1.0.3 2014-10-16 00:49:33 -0300
+; Library v1.2.0 2014-10-18T18:01:10-03:00
 ; more on github.com/haggen/euo
 ;
 ; About:
@@ -20,37 +20,47 @@ if #nsname <> Library
 
 ; Call given subroutine name, with
 ; following optional arguments.
-set !args
+set !a
+set !0 %0 - 1
 
 if %0 > 1
 {
   for !i 2 %0
-    set !args % . !i , #spc , !args
+  {
+    set !h !i - 1
+    set ! . !h % . !i
+    set !a !a , #spc , % . !i
+  }
 }
 
-gosub %1 !args
+; Call selected subroutine
+gosub %1 !a
+
+; Load back the previous namespace
+namespace pop
+
+; Done
 exit
-halt
 
 ;
 ; Reads journal between two points, if third
 ; argument is omitted assumes last index and
 ; read string from second argument.
 ;
-; %1 -> starting index
-; %2 -> ending index
-; %3 -> string to search for
+; !1-> starting index
+; !2 -> ending index
+; !3 -> string to search for
 ;
 sub journal
-  if %0 < 3
+  if !0 < 3
   {
-    set %3 %2
-    set %2 #jindex
+    set !3 !2
+    set !2 #jindex
   }
-  for !i %1 %2
+  for !i !1 !2
   {
     scanjournal !i
-    if %3 in #journal
+    if !3 in #journal
       return #true
   }
   return #false
@@ -71,4 +81,14 @@ sub target
   set #targcurs 1
   while #targcurs = 1
     wait 2
+  return #ltargetid
+
+;
+; Display debug message if %debug flag is #true
+;
+sub debug
+  if %debug
+    event sysmessage !a
   return
+  
+halt
