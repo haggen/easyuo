@@ -1,0 +1,83 @@
+; Looter-Menu v1.0.0 2014-10-18T17:57:04-03:00
+; more on github.com/haggen/euo
+;
+; About:
+; Provides a graphic menu to select the loot table.
+;
+; Depends on:
+; - Looter v1.2 [github.com/haggen/euo/Looter.euo]
+; - Library v1.2 [github.com/haggen/euo/Library.euo]
+;
+; Roadmap:
+; - Allow user to change hot key
+;
+
+; Speed things up
+set #lpc 100
+
+; Define correct namespace
+if #nsname <> Looter
+{
+  namespace push
+  namespace global Looter
+}
+
+; Build the menu
+menu window title Looter
+menu window size 300 240
+
+menu check option_1 10 10 280 20 #true Gold
+set %option_1 POF_
+
+menu check option_2 10 30 280 20 #false Magery reagents
+set %option_2 KZF_SZF_MZF_JUF_RZF_KUF_WZF_
+
+menu check option_3 10 50 280 20 #false Gems and Arcane Gem
+set %option_3 EVF_GVF_ZVF_BVF_RVF_HVF_VVF_JSL_UVF_NVF_
+
+menu check option_4 10 70 280 20 #false Musical instruments
+set %option_4 OQF_LQF_PRF_KRF_MQF_QRF_RGP_PGP_
+
+menu check option_5 10 90 280 20 #false Swords and axes
+set %option_5 YPO_BNF_CPH_INF_FSF_OSF_ASF_HNF_FMH_CNF_LSF_NSF_ISF_SMH_RMH_CSF_ZRF_MPH_LPH_MSF_BSF_KPO_GUO_KTF_JTF_BPH_EPH_ZSF_ATF_JPH_SOH_POH_NMH_OMH_LPO_ZTO_XTH_YTH_HSF_KSF_NPO_XPO_FUO_JPO_QPF_NPF_KPH_FYG_RHM_SFR_
+
+menu check option_6 10 110 280 20 #false Bows, crossbows and ammunition
+set %option_6 WOH_TOH_QPO_SPO_WOH_TOH_JSF_USF_LMH_MMH_QPO_SPO_PPO_RPO_JSF_USF_LMH_MMH_PPO_RPO_JSF_RWF_LNK_FKF_
+
+menu check option_7 10 130 280 20 #false Leather armor
+set %option_7 VKH_NJL_QJL_JKH_QKH_DLH_HKH_PKH_SKH_KKH_ELH_PSF_QSK_ATK_ZSK_OSK_YSK_NSK_
+
+menu check option_8 10 150 280 20 #false Studded leather armor
+set %option_8 ALH_ULH_LLH_YKH_GLH_XKH_FLH_RLH_MLH_SSK_RSK_
+
+menu check option_9 10 170 280 20 #false Platemail
+set %option_9 MSH_LSH_NSH_ISH_HSH_KSH_JSH_USH_WSH_ASH_ESH_GSH_OSH_CSH_
+
+menu check option_10 10 190 280 20 #false Shields
+set %option_10 LIK_MIK_CLK_AIK_CIK_LYD_GIK_NIK_ZHK_HLK_BLK_FIK_BIK_OIK_
+
+menu check option_11 10 210 280 20 #false Containers (bags, backpackes, etc.)
+set %option_11 , ZJF_LKF_CKF_YKK_
+
+menu show
+
+; Refresh loot every half second
+loop:
+  set %_loot
+
+  for !i 1 11
+  {
+    menu get option_ . !i
+    if #menures
+      set %_loot %_loot , %option_ . !i
+  }
+
+  if !loot <> %_loot
+    event sysmessage %_loot
+
+  set !loot %_loot
+
+  wait 10
+  goto loop
+
+halt
