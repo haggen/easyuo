@@ -1,4 +1,4 @@
-; Looter-Menu v1.0.0 2014-10-18T17:57:04-03:00
+; Looter-Menu v1.0.1 2014-10-18T17:57:04-03:00
 ; more on github.com/haggen/euo
 ;
 ; About:
@@ -14,6 +14,9 @@
 
 ; Speed things up
 set #lpc 100
+
+; Turn on/off debug messages
+set %debug #false
 
 ; Define correct namespace
 if #nsname <> Looter
@@ -73,7 +76,10 @@ loop:
   }
 
   if !loot <> %_loot
-    event sysmessage %_loot
+  {
+    call Library.euo Loot:
+    call Library.euo %_loot
+  }
 
   set !loot %_loot
 
