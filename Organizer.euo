@@ -1,8 +1,8 @@
-; Organizer v1.0.0 2014-10-13 16:05:32 -0300
+; Organizer v1.1.0 2014-10-18T18:06:51-03:00
 ; more on github.com/haggen/euo
 ;
 ; About:
-; ...
+; Move all items between two containers.
 ;
 ; Depends on:
 ; - Library [github.com/haggen/euo/Library.euo]
@@ -10,6 +10,9 @@
 
 ; Speed things up
 set #lpc 100
+
+; Turn debug messages on/off
+set %debug #true
 
 ;::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ; CONFIGURATION SECTION - DO NOT EDIT ABOVE THIS LINE!
@@ -43,12 +46,20 @@ organize:
   event exmsg #charid 0 28 From...
   call Library.euo target
   set %source_c #ltargetid
+  set #lobjectid %source_c
+  event macro 17
+  
+  call Library.euo debug From #ltargetid
 
   event exmsg #charid 0 28 To...
   call Library.euo target
   set %target_c #ltargetid
+  
+  call Library.euo debug To #ltargetid
+  
+  wait 10
 
-  finditem * c_ , %source_c
+  finditem * C_ , %source_c
 
   call Library.euo benchmark
 
@@ -56,7 +67,7 @@ organize:
   {
     ; Log what is being moved
     event property #findid
-    event sysmessage [ , #findindex , / , #findcnt , ] #property
+    call Library.euo debug [ , #findindex , / , #findcnt , ] #property
 
     set %j #jindex
     exevent drag #findid #findstack
