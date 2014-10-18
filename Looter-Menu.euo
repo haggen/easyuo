@@ -77,8 +77,8 @@ loop:
 
   if !loot <> %_loot
   {
-    call Library.euo Loot:
-    call Library.euo %_loot
+    call Library.euo debug Loot:
+    call Library.euo debug %_loot
   }
 
   set !loot %_loot
