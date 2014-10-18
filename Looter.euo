@@ -27,8 +27,8 @@
 ; Speed things up
 set #lpc 100
 
-; Display debug messages
-set %debug #true
+; Turn on/off debug messages
+set %debug #false
 
 ; Define correct namespace
 if #nsname <> Looter
