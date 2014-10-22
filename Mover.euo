@@ -16,9 +16,7 @@ target:
   set %t #ltargetid
 
 move:
-  exevent drag %t 65356
-  exevent dropc #backpackid
-    
+  call Library.euo move %t #backpackid 0    
   goto idle
   
   
