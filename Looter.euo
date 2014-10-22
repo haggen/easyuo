@@ -1,61 +1,49 @@
-; Looter v1.3.0 2014-10-18T20:44:46-03:00
+; Looter v2.0.1 2014-10-20T20:43:49-02:00
 ; more on github.com/haggen/euo
 ;
-; About:
-; On the first run you'll be asked for a lootsack - the container
-; where the loot will be put into. Then it'll survey the area around
-; you for corpses, up to 2 tiles away. Whenever a corpse is found
-; it'll drag the items that match the loot table into the lootsack.
-; If something prevents the item from being moved (lag, you're dead,
-; etc.) it'll go back to survey mode and try to repeat the procedure.
-; After all the items are moved the corpse will be ignored until the
-; execution is restarted. If the lootsack is unreachable for any
-; reason, you'll be asked to target it again. Consecutive runs will
-; remember a previously selected lootsack.
+; Purpose:
+; Loot selected items from corpses based on auto surveying or custom hotkey.
 ;
 ; Depends on:
 ; - Library v1.2 [github.com/haggen/euo/Library.euo]
 ;
 ; Known issues:
 ; - Your maximum weight is not being considered
-; - It'll overlap currently lifted items and that may cause problems
 ;
 ; Roadmap:
-; - Refactor loot table (split into more categories, add missing items)
-; - Allow the player to choose between 2 modes; full auto or hot key
+; - Refactor loot table (split into more categories and add missing items)
 ;
 
-; Speed things up
-set #lpc 100
-
-; Turn on/off debug messages
-set %debug #false
+; Make it fast
+linespercycle 80
 
 ; Define correct namespace
-if #nsname <> Looter
-{
-  namespace push
-  namespace global Looter
-}
+namespace global Looter
 
 ;::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ; CONFIGURATION SECTION - DO NOT EDIT ABOVE THIS LINE!
 ;::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-; 1. Change the values below to define your hotkey
+; 0. Choose a mode of operation:
+; -----------------------------------------------------
+; auto   -> Automatically survey for corpses around you.
+; hotkey -> Survey only once whenever the hotkey is pressed.
+set !mode hotkey
 
+; 1. Change the variables below to define a hotkey.
+; -----------------------------------------------------
 ; CTRL, SHIFT, ALT, or <blank>
-set %mod CTRL
+;
+; A-Z, 0-9, F1-F12, ESC, BACK, TAB, ENTER, PAUSE, 
+; CAPSLOCK, SPACE, PGDN, PGUP, END, HOME, LEFT, 
+; RIGHT, UP, DOWN, PRNSCR, INSERT, DELETE, 
+; NUMLOCK or SCROLLLOCK
+set !hotkey_m CTRL
+set !hotkey_k A
 
-; Any of the following:
-; A-Z, 0-9, F1-F12, ESC, BACK, TAB, ENTER,
-; PAUSE, CAPSLOCK, SPACE, PGDN, PGUP, END,
-; HOME, LEFT, RIGHT, UP, DOWN, PRNSCR,
-; INSERT, DELETE, NUMLOCK or SCROLLLOCK
-set %key A
-
-; 2. Comment in/out the lines below to select the loot you want
-
+; 2. Comment in or out the loot you want:
+; -----------------------------------------------------
+;
 ; Gold
 set !loot POF_
 
@@ -89,57 +77,66 @@ set !loot !loot , LIK_MIK_CLK_AIK_CIK_LYD_GIK_NIK_ZHK_HLK_BLK_FIK_BIK_OIK_
 ; Musical instruments
 set !loot !loot , OQF_LQF_PRF_KRF_MQF_QRF_RGP_PGP_
 
+; 3. Disclose (broadcast) looted items ?
+; -----------------------------------------------------
+set !disclose #true
+
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ; END OF CONFIGURATION SECTION - DO NOT EDIT BELOW THIS LINE!
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-; Try to use graphical menu
+; Try to use menu
 call Looter-Menu.euo
 
-; Log selected hot key
-call Library.euo debug Hotkey is %mod %key
-
-; Make sure a lootsack's been selected
-gosub lootsack
-
-; Listen to the hotkey
 idle:
-  call Library.euo debug Idle
-  call Library.euo debug Loot:
-  call Library.euo debug !loot
-  wait 10
+
+  ; Refresh configuration from menu
+  call Looter-Menu.euo refresh
+
+  ; Assert the lootsack is accessible
+  gosub lootsack
+
+  ; Fork path, if it's in auto mode
+  ; go straigth for survey, listen 
+  ; to hotkey otherwise
+  if !mode = auto
+    goto survey
   
 loop:
-  call Looter-Menu.euo refresh
-  onhotkey %key %mod
+
+  onhotkey !hotkey_k !hotkey_m
     goto survey
-  goto loop
+  goto idle
 
-; Look for corpses up to 2 tiles away
 survey:
-  call Library.euo debug Survey
 
+  ; Look for corpses up to 2 tiles away
   finditem YFM_WNF_QNF g_2
 
+  ; If nothing's found, go idle
   if #findcnt = 0
     goto idle
 
+  ; Time the procedure
   call Library.euo benchmark
 
+  ; Point the corpse
   set %corpse #findid
   event exmsg %corpse 0 28 Corpse
 
+  ; Open the corpse container in a prectiable position
   set #nextcposx 50
   set #nextcposy 50
 
-  ; Open the corpse
+  ; Mark journal position
   set %j #jindex
+
   set #lobjectid %corpse
   event macro 17
   wait 10
 
-  ; If you're dead, abort
-  call Library.euo journal %j I_am_dead
+  ; Abort if you're dead
+  call Library.euo journal %j am_dead
   if #result
     goto idle
 
@@ -152,20 +149,16 @@ survey:
     goto idle
   }
 
-  ; If the container size does not match
-  ; a corpse container, look again
+  ; Restart if the container size doesn't 
+  ; match the size of a corpse container
   if #contsize <> 144_212
-    goto survey
+    goto idle
 
-  ; Make sure there's a lootsack defined and it's accessible
-  gosub lootsack
-
-; Find the loot
+; Find and grab the loot
 loot:
   finditem !loot c_ , %corpse
 
-  ; If no selected loot is found,
-  ; mark corpse as empty and move on
+  ; Flag the corpse as empty if no loot is found
   if #findcnt = 0
   {
     event exmsg %corpse 0 28 Empty
@@ -173,52 +166,46 @@ loot:
     goto idle
   }
 
-  ; For each item found, try to drag it to your
-  ; lootsack, whilst checking for possible failures
+  ; For each item that is found, try to move it into your 
+  ; lootsack, while checking for possible failures
   while #findindex <= #findcnt
   {
-    event property #findid
-    call Library.euo debug [ , #findindex , / , #findcnt , ] #property
+    ; Try to move the item
+    call Library.euo move #findid *lootsack
 
-    set %j #jindex
-
-    ; Move the item
-    exevent drag #findid #findstack
-    exevent dropc *lootsack
-    wait 6
-
-    ; Check for failure messages
-    call Library.euo journal %j must_wait_to_perform
-    if #result
+    ; Check for response messages
+    if must_wait_to_perform in #result
       continue
 
-    call Library.euo journal %j I_am_dead
-    if #result
-      goto survey
+    if am_dead in #result
+      goto idle
 
-    call Library.euo journal %j cannot_do_that
-    if #result
-      goto survey
+    if cannot_do_that in #result
+      goto idle
 
-    call Library.euo journal %j too_far_away
-    if #result
-      goto survey
+    if too_far_away in #result
+      goto idle
 
-    call Library.euo journal %j out_of_sight
-    if #result
-      goto survey
+    if out_of_sight in #result
+      goto idle
 
-  ; Move on to the next item
+    if !disclose
+    {
+      event property #findid
+      msg #property
+    }
+
+    ; Move on to the next item
     set #findindex #findindex + 1
   }
 
   call Library.euo benchmark
-  event exmsg #charid 0 28 Acquired #findcnt item(s) in #result sec
+  call Library.euo Acquired #findcnt item(s) in #result sec
   
   ; Make sure you looted everything
   goto loot
 
-; Find previously selected lootsack, otherwise target a new one
+; Assert a lootsack is accessible
 sub lootsack
   finditem *lootsack
 
