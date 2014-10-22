@@ -8,8 +8,8 @@
 ; call Library.euo <subroutine> <arguments...>
 ;
 
-; Speed things up
-set #lpc 100
+; Make it fast
+linespercycle 80
 
 ; Define namespace
 if #nsname <> Library
@@ -47,7 +47,7 @@ exit
 ; argument is omitted assumes last index and
 ; read string from second argument.
 ;
-; !1-> starting index
+; !1 -> starting index
 ; !2 -> ending index
 ; !3 -> string to search for
 ;
@@ -90,5 +90,48 @@ sub debug
   if %debug
     event sysmessage !a
   return
-  
-halt
+
+;
+; Move one item to given container, 
+; and save possible response messages
+; into the result. It does not scan for
+; items though.
+;
+; !1 -> id of the item you want to move
+; !2 -> id of the container where the item will be moved into
+; !3 -> pause time after dropping the item, default is 6 (cycles, i.e. 300ms)
+;
+; TODO: explain return messages
+;
+sub move
+  set !j #jindex
+
+  if !0 < 3
+    set !3 6
+
+  exevent drag !1 65535
+  exevent dropc !2
+  wait !3
+
+  ; Check for possible response messages
+  call Library.euo journal !j must_wait_to_perform
+  if #result
+    return must_wait_to_perform
+
+  call Library.euo journal !j am_dead
+  if #result
+    return am_dead
+
+  call Library.euo journal !j cannot_do_that
+  if #result
+    return cannot_do_that
+
+  call Library.euo journal !j too_far_away
+  if #result
+    return too_far_away
+
+  call Library.euo journal !j out_of_sight
+  if #result
+    return out_of_sight
+
+  return #true
