@@ -1,25 +1,31 @@
 --
--- Normalize v1.0.0 2014-10-25T19:06:55-02:00
+-- Normalize v1.0.5 2014-10-27T20:59:10-02:00
 -- more on github.com/haggen/openeuo
 --
 
+--
+-- Extend standard library
+--
+
+-- Execute fn with index and value of each element found in the table t.
 function table.each(t, fn)
-  for k, v in pairs(t) do fn(k, v) end
+  return for k, v in pairs(t) do fn(k, v) end
 end
 
-function table.any(t, fn)
-  for k, v in pairs(t) do
-    if fn(k, v) then return true end
-  end
-
-  return false
+-- Execute fn with index and value of each element found in the table t,
+-- and returns the first evaluation that gets a truthy value.
+function table.any(t, fn, k)
+  local nk, v = next(t, k)
+  return nk ~= nil and fn(k, v) or table.any(t, fn, nk)
 end
- 
+
+-- Tells if the table t has the value n.
 function table.has(t, n)
-  local fn = function(k, v) return v == n end
-  return table.any(t, fn)
+  return table.any(t, function(k, v) return v == n end)
 end
 
+--
+-- Normalize UO API
 --
 
 keystroke    = UO.Key
@@ -28,27 +34,33 @@ message      = UO.Msg
 exmessage    = UO.ExMsg
 sysmessage   = UO.SysMessage
 getjournal   = UO.GetJournal
-hideitem     = UO.HideItem 
 getitem      = UO.GetItem
 getskill     = UO.GetSkill
 getpixel     = UO.GetPix
 getgump      = UO.GetCont
 scanitems    = UO.ScanItems
 scanjournal  = UO.ScanJournal
+hideitem     = UO.HideItem
 contextmenu  = UO.Popup
 renamepet    = UO.RenamePet
 statusbar    = UO.StatBar
-itemproperty = UO.Property
+property     = UO.Property
 
----
+--
+-- Helper functions
+--
 
+-- Reckons the practical distance between two coordinates.
 function distance(xa, ya, xb, yb)
   return math.max(math.abs(xa - xb), math.abs(ya - yb))
 end
 
----
+--
+-- Last target API, provides read and write access to last target's information.
+--
 
 lasttarget = {}
+setmetatable(lasttarget, lasttarget)
 
 lasttarget.__index = function(t, k)
   if     k == 'id'   then return UO.LTargetID
@@ -61,21 +73,22 @@ lasttarget.__index = function(t, k)
   end
 end
 
-lasttarget.__newindex = function(t, k, v)
-  if     k == 'id'   then UO.LTargetID   = v
-  elseif k == 'kind' then UO.LTargetKind = v
-  elseif k == 'tile' then UO.LTargetTile = v
-  elseif k == 'x'    then UO.LTargetX    = v
-  elseif k == 'y'    then UO.LTargetY    = v
-  elseif k == 'z'    then UO.LTargetZ    = v
+lasttarget.__newindex = function(t, k, value)
+  if     k == 'id'   then UO.LTargetID   = value
+  elseif k == 'kind' then UO.LTargetKind = value
+  elseif k == 'tile' then UO.LTargetTile = value
+  elseif k == 'x'    then UO.LTargetX    = value
+  elseif k == 'y'    then UO.LTargetY    = value
+  elseif k == 'z'    then UO.LTargetZ    = value
   end
 end
 
-setmetatable(lasttarget, lasttarget)
-
----
+--
+-- Last item API, akin to last object
+--
 
 lastitem = {}
+setmetatable(lastitem, lastitem)
 
 lastitem.__index = function(t, k)
   if     k == 'id'   then return UO.LObjectID
@@ -88,11 +101,13 @@ lastitem.__newindex = function(t, k, v)
   if k == 'id' then UO.LObjectID = v end
 end
 
-setmetatable(lastitem, lastitem)
-
----
+--
+-- Player API, provides read access to your character's information
+-- and also commands that affect your character directly.
+--
 
 player = {}
+setmetatable(player, player)
 
 player.__index = function(t, k)
   if     k == 'armor'        then return UO.AR
@@ -139,11 +154,16 @@ player.__index = function(t, k)
   end
 end
 
-setmetatable(player, player)
+player.distance = function(x, y)
+  return distance(player.x, player.y, x, y)
+end
 
----
+--
+-- Cursor API
+--
 
 cursor = {}
+setmetatable(cursor, cursor)
 
 cursor.__index = function(t, k)
   if     k == 'x'      then return UO.CursX
@@ -159,17 +179,13 @@ cursor.__newindex = function(t, k, v)
   if k == 'target' then UO.TargCurs = v end
 end
 
-setmetatable(cursor, cursor)
-
----
-
-player.distance = function(x, y)
-  return distance(x, y, player.x, player.y)
-end
-
----
+--
+-- Client API
+--
 
 client = {}
+
+setmetatable(client, client)
 
 client.__index = function(t, k)
   if     k == 'id'       then return UO.CliCnt
@@ -187,26 +203,16 @@ client.__index = function(t, k)
   end
 end
 
-setmetatable(client, client)
+--
+-- Item API
+--
 
----
+item = {}
 
-shop = {}
+item.lastquery = nil
+item.lastscan = nil
 
-shop.__index = function(t, k)
-  if     k == 'topentry'  then return UO.GetShop
-  elseif k == 'setamount' then return UO.SetShop
-  else                         return nil
-  end
-end
-
-setmetatable(shop, shop)
-
----
-
-items = {}
-
-items.get = function(...)
+item.get = function(...)
   local t = {}
 
   t.id, t.type, t.kind, t.container, t.x, t.y, t.z, t.stack, t.reputation, t.color = getitem(...)
@@ -226,11 +232,13 @@ items.get = function(...)
   return setmetatable(t, t)
 end
 
-items.query = function(query) 
+item.parsequery = function(query)
   if type(query) == 'number' then
     return function(item) return item.id == query end
   elseif type(query) == 'table' then
     return function(item) return table.has(query, item.type) end
+  elseif type(query) == 'string' then
+    return function(item) return dostring(query) end
   elseif type(query) == 'function' then
     return query
   else
@@ -238,39 +246,67 @@ items.query = function(query)
   end
 end
 
-items.scan = function(query, visibleonly)
-  local query, t = items.query(query), {}
+item.scan = function(query, visibleonly)
+  local query, t = item.parsequery(query), {}
+
+  -- if query == item.lastquery then return item.lastscan end
+
+  item.lastquery = query
 
   for index = 0, scanitems(visibleonly or false) - 1 do
-    local item = items.get(index)
+    local item = item.get(index)
     if query(item) then table.insert(t, item) end
   end
+
+  item.lastscan = t
 
   return t
 end
 
-items.drag = function(id, amount)
+item.drag = function(query, amount)
+  if type(query) == 'number' then
+    local id = query
+  else
+    local id = item.scan(query)[1].id
+  end
+
   return UO.Drag(id, amount or 65535)
 end
 
-items.drop = function(...)
-  local n = #{...}
+item.drop = function(...)
+  local args = {...}
 
   if n == 0 then
     return UO.DropPD()
   elseif n >= 2 then
     return UO.DropG(...)
   else
+    if type(args[1]) ~= 'number' then
+      args[1] = item.scan(args[1])[1].id
+    end
+
     return UO.DropC(...)
   end
 end
 
-items.use = function(id)
+item.use = function(query)
+  if type(query) == 'number' then
+    local id = query
+  else
+    local id = item.scan(query)[1].id
+  end
+
   lastitem.id = id
   return macro(17, 0)
 end
 
-items.target = function(id)
+item.target = function(query)
+  if type(query) == 'number' then
+    local id = query
+  else
+    local id = item.scan(query)[1].id
+  end
+
   lasttarget.id = id
   return macro(22, 0)
 end
