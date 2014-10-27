@@ -1,0 +1,23 @@
+namespace global lumberchopper
+
+menu combo create wood_behavior 10 10 200
+menu combo add wood_behavior Make boards out of logs
+menu combo add wood_behavior Stack logs on the ground
+menu combo select wood_behavior 1
+
+menu window size 240 42
+menu window title LumberChopper options
+menu show 100 100
+
+main:
+
+menu get wood_behavior
+
+if #menures = 1
+  set !makeboard #true
+else
+  set !makeboard #false
+
+wait 1s
+
+goto main

@@ -1,0 +1,185 @@
+namespace global lumberchopper
+
+set %axe_t LSF
+set %log_t ZLK
+
+survey:
+  event sysmessage Survey
+
+  gosub findtile tree in name 6
+
+  if #result = #false
+    goto survey
+
+moving:
+  event sysmessage Moving
+
+  move %x %y 1 4s
+
+chopping:
+  event sysmessage Chopping
+
+  finditem %axe_t c_ , #charid
+
+  if #findcnt < 1
+  {
+    display Please, equip a battle axe.
+    wait 5s
+    goto chopping
+  }
+
+  set #lobjectid #findid
+
+  set %journal_s #jindex
+
+  event macro 17
+  target 2s
+
+  set #ltargetx %x
+  set #ltargety %y
+  set #ltargetz #tilez
+  set #ltargettile #tiletype
+  set #ltargetkind 3
+  event macro 22
+
+  wait 2s
+
+  set %journal_e #jindex
+
+  gosub journal_has too_far_away %journal_s %journal_e
+
+  if #result = #true
+    goto moving
+
+  gosub journal_has use_an_axe_on_that %journal_s %journal_e
+
+  if #result = #true
+  {
+    gosub ignoretile %x %y
+    goto survey
+  }
+
+  gosub journal_has not_enough_wood_here %journal_s %journal_e
+
+  if #result = #true
+  {
+    gosub ignoretile %x %y
+    gosub stackatfeet
+    goto survey
+  }
+
+  gosub journal_has cannot_be_seen %journal_s %journal_e
+
+  if #result = #true
+    goto survey
+
+  goto chopping
+
+;--
+
+halt
+
+;--
+
+sub findtile ; %property %evaluation %value %range
+  event sysmessage Find tile
+
+  tile init
+
+  set %range %4
+  set %n %range * 2
+
+  event sysmessage Finding tiles withing a range of %range , ...
+  set %timing #scnt
+
+  for %i 0 %n
+  {
+    set %y #charposy + %i - %range
+
+    for %j 0 %n
+    {
+      set %x #charposx + %j - %range
+
+      if ( %x = #charposx ) && ( %y = #charposy )
+        continue
+
+      if ( %x , _ , %y ) in %ignoretile
+        continue
+
+      tile cnt %x %y
+
+      for %t 0 #tilecnt
+      {
+        tile get %x %y %t
+
+        if ( %1 %2 #tile . %3 )
+        {
+          set %timing #scnt - %timing
+          event sysmessage Done in %timing seconds!
+          return #true
+        }
+      }
+    }
+  }
+
+  set %timing #scnt - %timing
+  event sysmessage Done in %timing seconds!
+  return #false
+
+;--
+
+sub journal_has ; %passage %start %end
+  for %i %2 %3
+  {
+    scanjournal %i
+
+    if %1 in #journal
+      return #true
+  }
+  return #false
+
+;--
+
+sub ignoretile ; %x %y
+  set %ignoretile %ignoretile , _ , %1 , _ , %2
+  return
+
+;--
+
+sub makeboard
+  finditem %axe_t c_ , #backpackid
+  if #findcnt < 1
+  {
+    display You need more axes.
+    halt
+  }
+  set #lobjectid #findid
+  event macro 17
+
+  target 2s
+  finditem %log_t c_ , #backpackid
+  if #findcnt < 1
+    return
+  set #ltargetid #findid
+  set #ltargetkind 1
+  event macro 22
+  return
+
+;--
+
+sub stackatfeet
+  finditem %log_t c_ , #backpackid
+
+  if #findcnt > 0
+  {
+    exevent drag #findid #findstack
+    wait 10
+    set %dropx #charposx + 1
+    exevent dropg %dropx #charposy
+    wait 10
+  }
+  ;else
+  ;  return
+
+  ;gosub stackatfeet
+  return

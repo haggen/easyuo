@@ -1,0 +1,66 @@
+
+; SPELL ICON
+; Name -> spellicon_gump
+; Size -> 48x44
+; Kind -> SJXC
+; Type -> YC
+
+set %w 44
+set %h 44
+
+hotkey:
+  ; event sysmessage Idle
+
+  onhotkey UP
+    gosub move_to top
+    
+  onhotkey RIGHT
+    gosub move_to right
+    
+  onhotkey DOWN
+    gosub move_to bottom
+    
+  onhotkey LEFT
+    gosub move_to left
+    
+  goto hotkey
+  
+sub move_to
+
+  set %x #contposx
+  set %y #contposy
+  
+  event sysmessage Previous icon at %x %y
+  event sysmessage Next icon, snap to the %1
+
+  set %nx %x
+  set %ny %y
+
+  if %1 = top
+    set %ny %y - %h
+
+  if %1 = right
+    set %nx %x + %w
+
+  if %1 = bottom
+    set %ny %y + %h
+
+  if %1 = left
+    set %nx %x - %w
+
+  event sysmessage Next icon at %nx %ny
+  
+  ; Wait for the next icon...
+  while #contposx = %x
+    wait 10
+    
+  ; Click and move to the next spot
+  ; accordingly to the selected side
+  click #contposx #contposy mc n
+  click #contposx #contposy g
+  wait 5
+  click %nx %ny mc n
+  click %nx %ny p
+  
+  return
+

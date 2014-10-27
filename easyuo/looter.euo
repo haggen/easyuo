@@ -12,6 +12,8 @@
 ;
 ; Roadmap:
 ; - Refactor loot table (split into more categories and add missing items)
+; - Remember options from previous sessions
+; - Cut body and leather
 ;
 
 ; Make it fast
@@ -77,7 +79,7 @@ set !loot !loot , LIK_MIK_CLK_AIK_CIK_LYD_GIK_NIK_ZHK_HLK_BLK_FIK_BIK_OIK_
 ; Musical instruments
 set !loot !loot , OQF_LQF_PRF_KRF_MQF_QRF_RGP_PGP_
 
-; 3. Disclose (broadcast) looted items ?
+; 3. Disclose looted items ?
 ; -----------------------------------------------------
 set !disclose #true
 
@@ -154,8 +156,8 @@ survey:
   if #contsize <> 144_212
     goto idle
 
-; Find and grab the loot
 loot:
+
   finditem !loot c_ , %corpse
 
   ; Flag the corpse as empty if no loot is found
