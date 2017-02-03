@@ -1,0 +1,102 @@
+; Organizer v1.1.0 2014-10-18T18:06:51-03:00
+; more on github.com/haggen/euo
+;
+; About:
+; Move all items between two containers.
+;
+; Depends on:
+; - Library [github.com/haggen/euo/Library.euo]
+;
+
+; Speed things up
+set #lpc 10
+
+; Turn debug messages on/off
+set %debug #true
+
+;::::::::::::::::::::::::::::::::::::::::::::::::::::::
+; CONFIGURATION SECTION - DO NOT EDIT ABOVE THIS LINE!
+;::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+; Change the values below to define your hotkey
+
+; CTRL, SHIFT, ALT, or <blank>
+set %mod CTRL
+
+; Any of the following:
+; A-Z, 0-9, F1-F12, ESC, BACK, TAB, ENTER,
+; PAUSE, CAPSLOCK, SPACE, PGDN, PGUP, END,
+; HOME, LEFT, RIGHT, UP, DOWN, PRNSCR,
+; INSERT, DELETE, NUMLOCK or SCROLLLOCK
+set %key O
+
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+; END OF CONFIGURATION SECTION - DO NOT EDIT BELOW THIS LINE!
+;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+idle:
+  wait 10
+
+loop:
+  onhotkey %key %mod
+    goto organize
+  goto loop
+
+organize:
+  event exmsg #charid 0 28 From...
+  call Library.euo target
+  set %source_c #ltargetid
+  set #lobjectid %source_c
+  event macro 17
+  
+  call Library.euo debug From #ltargetid
+
+  event exmsg #charid 0 28 To...
+  call Library.euo target
+  set %target_c #ltargetid
+  
+  call Library.euo debug To #ltargetid
+  
+  wait 10
+
+  finditem * C_ , %source_c
+
+  call Library.euo benchmark
+
+  while #findindex <= #findcnt
+  {
+    ; Log what is being moved
+    event property #findid
+    call Library.euo debug [ , #findindex , / , #findcnt , ] #property
+
+    set %j #jindex
+    exevent drag #findid #findstack
+    exevent dropc %target_c
+    wait 6
+
+    call Library.euo journal %j must_wait_to_perform
+    if #result
+      continue
+
+    call Library.euo journal %j too_far_away
+    if #result
+      goto abort
+
+    call Library.euo journal %j out_of_sight
+    if #result
+      goto abort
+
+    call Library.euo journal %j cannot_do_that
+    if #result
+      goto abort
+
+    set #findindex #findindex + 1
+  }
+
+  call Library.euo benchmark
+  event exmsg #charid 0 28 Moved #findcnt in #result sec
+  goto idle
+
+abort:
+  event exmsg #charid 0 28 Aborted
+  goto idle

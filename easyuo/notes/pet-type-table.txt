@@ -1,0 +1,86 @@
+;
+; Name - name of the pet
+; S    - the minimum skill required to tame
+; G    - the skill level that has a 10% success rate
+; G    - the skill level that has an 90% success rate
+; M    - pet is a monster
+; TYPE - EasyUO finditem type for pet
+; 
+; Name                  S   G  G  M TYPE
+; --------------------------------------
+; Dog               -21.3 -17 23  N HG
+; Gorilla           -18.9 -14 26  N RD
+; Jack Rabbit       -18.9 -14 26  N NF
+; Mongbat           -18.9 -14 26  Y BE
+; Rabbit            -18.9 -14 26  N NF
+; Skittering Hopper -12.9  -8 32  N GO
+; Bird               -6.9  -2 38  N WC
+; Cat                -0.9   4 44  N RF
+; Chicken            -0.9   4 44  N AG
+; Mountain Goat      -0.9   4 44  N KB
+; Rat                -0.9   4 44  N WG
+; Sewer Rat          -0.9   4 44  N WG
+; Cow                11.1  16 56  N IG_NG
+; Goat               11.1  16 56  N ZF
+; Pig                11.1  16 56  N JF
+; Sheep              11.1  16 56  N TF_PF
+; Eagle              17.1  22 62  N TC
+; Bullfrog           23.1  28 68  N BB
+; Hind               23.1  28 68  N TG
+; Slime              23.1  28 68  Y VE
+; Timber Wolf        23.1  28 68  N PG
+; Boar               29.1  34 74  N CO
+; Desert Ostard      29.1  34 74  N CG
+; Forest Ostard      29.1  34 74  N JG
+; Giant Beetle       29.1  34 74  Y ZGB
+; Giant Rat          29.1  34 74  N XF
+; Horse              29.1  34 74  N SF_MG_SG_OF
+; Pack Horse         29.1  34 74  N BO
+; Pack Llama         29.1  34 74  N WN
+; Rideable Llama     29.1  34 74  N EG
+; War Horse          29.1  34 74  N QC
+; Black Bear         35.1  40 80  N BG
+; Llama              35.1  40 80  N EG
+; Polar Bear         35.1  40 80  N VF
+; Walrus             35.1  40 80  N DG
+; Brown Bear         41.1  46 86  N ZI
+; Cougar             41.1  46 86  N ZE
+; Deathwatch Beetle  41.1  46 86  Y IH
+; Alligator          47.1  52 92  N UF
+; Scorpion           47.1  52 92  Y UE
+; Grey Wolf          53.1  58 98  N VD_XD
+; Panther            53.1  58 98  N YF
+; Snow Leopard       53.1  58 98  N L_M
+; Giant Spider       59.1  64 104 Y SD
+; Great Hart         59.1  64 104 N AH
+; Grizzly Bear       59.1  64 104 N WF
+; Snake              59.1  64 104 N QE
+; White Wolf         65.1  70 110 N GE_ZD
+; Gaman              68.7  73 113 N OH
+; Bull               71.1  76 116 N YG_XG
+; Giant Ice Worm     71.1  76 116 N
+; Hellcat (Small)    71.1  76 116 Y RF
+; Mongbat (Strong)   71.1  76 116 Y
+; Frost Spider       74.7  79 119 Y KD
+; Frenzied Ostard    77.1  82 122 N KG
+; Giant Toad         77.1  82 122 N CB
+; Bake Kitsune       80.7  85 125 Y EH
+; Lava Lizard        80.7  85 125 Y QF
+; Dire Wolf          83.1  88 128 N LD
+; Imp                83.1  88 128 Y W
+; Ridgeback          83.1  88 128 N WJ
+; Savage Ridgeback   83.1  88 128 N
+; Drake              84.3  89 129 Y YE_XE
+; Hell Hound         85.5  90 130 Y UB
+; Hellcat (Large)    89.1  94 134 Y NC
+; Dragon             93.9  98 138 Y CD_DF
+; Fire Beetle        93.9  98 138 Y JJ
+; Rune Beetle        93.9  98 138 Y CH
+; Swamp Dragon       93.9  98 138 Y MHB
+; Ki-Rin             95.1 100 140 Y SH
+; Nightmare          95.1 100 140 Y TJ
+; Unicorn            95.1 100 140 Y SC
+; White Wyrm         96.3 101 141 Y TE
+; Hiryu              98.7 103 143 Y HH
+; Lesser Hiryu       98.7 103 143 Y HH
+; Fire Steed          106 110 150 Y YJ

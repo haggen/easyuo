@@ -1,24 +1,27 @@
-; Library v1.2.0 2014-10-18T18:01:10-03:00
-; more on github.com/haggen/euo
+; Library v1.3.0 2017-02-03T16:58:12-02:00
+; More on https://github.com/haggen/euo
 ;
 ; About:
 ; Commonly used subroutines are deferred to this file.
 ;
 ; Usage:
-; call Library.euo <subroutine> <arguments...>
+; call library.euo <subroutine> <arguments...>
 ;
 
-; Make it fast
-linespercycle 80
+; Make it fast.
+linespercycle 60
 
-; Define namespace
+; Read debug flag from current namespace.
+set %debug !debug
+
+; Define namespace.
 if #nsname <> Library
 {
   namespace push
   namespace local Library
 }
 
-; Call given subroutine name, with
+; Call the given subroutine, with
 ; following optional arguments.
 set !a
 set !0 %0 - 1
@@ -33,13 +36,13 @@ if %0 > 1
   }
 }
 
-; Call selected subroutine
+; Call selected subroutine.
 gosub %1 !a
 
-; Load back the previous namespace
+; Load back the previous namespace.
 namespace pop
 
-; Done
+; Done.
 exit
 
 ;
@@ -47,9 +50,9 @@ exit
 ; argument is omitted assumes last index and
 ; read string from second argument.
 ;
-; !1 -> starting index
-; !2 -> ending index
-; !3 -> string to search for
+; !1 -> Starting index.
+; !2 -> Ending index.
+; !3 -> String to search for.
 ;
 sub journal
   if !0 < 3
@@ -84,7 +87,7 @@ sub target
   return #ltargetid
 
 ;
-; Display debug message if %debug flag is #true
+; Display debug message if %debug flag is #true.
 ;
 sub debug
   if %debug
@@ -92,16 +95,13 @@ sub debug
   return
 
 ;
-; Move one item to given container, 
-; and save possible response messages
-; into the result. It does not scan for
-; items though.
+; Move the item to given container, and
+; save possible response messages into 
+; the result.
 ;
-; !1 -> id of the item you want to move
-; !2 -> id of the container where the item will be moved into
-; !3 -> pause time after dropping the item, default is 6 (cycles, i.e. 300ms)
-;
-; TODO: explain return messages
+; !1 -> ID of the item you want to move.
+; !2 -> ID of the container where the item will be moved into.
+; !3 -> Pause after dropping the item. Default is 6 cycles i.e. 300ms.
 ;
 sub move
   set !j #jindex
@@ -114,24 +114,55 @@ sub move
   wait !3
 
   ; Check for possible response messages
-  call Library.euo journal !j must_wait_to_perform
+  call library.euo journal !j must_wait_to_perform
   if #result
     return must_wait_to_perform
 
-  call Library.euo journal !j am_dead
+  call library.euo journal !j am_dead
   if #result
     return am_dead
 
-  call Library.euo journal !j cannot_do_that
+  call library.euo journal !j cannot_do_that
   if #result
     return cannot_do_that
 
-  call Library.euo journal !j too_far_away
+  call library.euo journal !j too_far_away
   if #result
     return too_far_away
 
-  call Library.euo journal !j out_of_sight
+  call library.euo journal !j out_of_sight
   if #result
     return out_of_sight
 
+  return #true
+
+;
+; Wait for system variables conditions to be met.
+;
+; !1 -> Variable to be evaluated.
+; !2 -> Evaluating operator.
+; !3 -> Value to be matched.
+; ...
+; !n -> Timeout. Default is 3s.
+;
+sub waitforsysvars
+  set %n !0 / 3
+
+  if ( !0 % 3 = 1 )
+    set %timeout #scnt + % . !0
+  else
+    set %timeout #scnt + 3
+
+  for %i 1 %n
+  {
+    set %offset 3 * %i - 2
+    set %evaluation %offset + 1
+    set %value %offset + 2
+
+    if ! ( # . ! . %offset ! . %evaluation  ! . %value )
+      set %i 0
+
+    if #scnt > %timeout
+      return #false
+  }
   return #true

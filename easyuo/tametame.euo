@@ -1,0 +1,251 @@
+; TameTame v1.0.0 2017-02-03T16:39:22-02:00
+; More on https://github.com/haggen/euo
+;
+; Purpose:
+; Survey, follow and tame creatures around the area.
+;
+; Depends on:
+; - Library v1.3 (https://github.com/haggen/euo/library.euo)
+;
+; Known issues:
+; - Fail to detect when the target is unreachable
+;
+; Roadmap:
+; - ...
+;
+
+; Make it fast.
+linespercycle 20
+
+; Global namespace for integrating with other scripts.
+namespace global tametame
+
+; Turn debug messages on/off.
+set !debug #true
+
+; Reload ignore list.
+ignoreitem *tametame_ignore
+
+; Creature types we're looking for.
+set %creatures SF_MG_SG_OF_BO_WN_EG_QC_BG_EG_VF_DG_ZI_ZE_IH_IG_NG_ZF_JF_TF_PF_TC_BB_TG_VE_PG_CO_CG_JG_ZGB_XF_L_M_SD_AH_
+
+survey:
+
+  call library.euo debug Surveying...
+
+  ; Find a creature nearby.
+  finditem %creatures G_12
+
+  ; Keep looking...
+  if #findcnt = 0
+  {
+    wait 1s
+    goto survey
+  }
+
+  ; Prepare variables.
+  set %attempts 0
+  set %taming #false
+  set %target #findid
+
+  call library.euo debug Found: #findid
+
+  ; Halt character movement.
+  click 0 0 r
+
+pursue:
+
+  ; Abort if it's exceeded maximum attempts.
+  if %attempts >= 3
+  {
+    gosub ignore %target
+    goto survey
+  }
+
+  if %taming = #false
+    call library.euo debug Attempt # , %attempts
+
+  ; Update target's location.
+  finditem %target
+
+  ; Make sure it still can be found.
+  if #findcnt = 0
+    goto survey
+
+  call library.euo debug Walking towards it...
+
+  ; Move to its position.
+  ; event pathfind #findx #findy #findz
+  move #findx #findy 1 5s
+
+  if %taming = #false
+  {
+    call library.euo debug Taming...
+
+    ; Flag we've started taming the creature.
+    set %taming #true
+
+    ; Save journal position.
+    set %j #jindex
+
+    ; Use Animal Taming.
+    event macro 13 35
+    target 2s
+
+    ; Target the creature.
+    set #ltargetid %target
+    set #ltargetkind 1
+    event macro 22
+    wait 2s
+
+    ; Check if it is indeed tamable.
+    call library.euo journal %j can't_tame_that
+
+    ; Bail if it isn't.
+    if #result = #true
+    {
+      call library.euo debug Not doable.
+      gosub ignore %target
+      goto survey
+    }
+
+    ; Check if you have too many followers.
+    call library.euo journal %j too_many_followers
+
+    ; Bail if you do.
+    if #result = #true
+    {
+      call library.euo debug You can't have another pet.
+      halt
+    }
+
+    ; Check if we have the required skill.
+    call library.euo journal %j You_have_no_chance
+
+    ; Bail if we don't.
+    if #result = #true
+    {
+      call library.euo debug Creature is too hard.
+      gosub ignore %target
+      goto survey
+    }
+
+    ; Check if our target isn't already tamed.
+    call library.euo journal %j That_animal_looks_tamed
+
+    ; Bail if it is.
+    if #result = #true
+    {
+      call library.euo debug Creature is already tamed.
+      gosub ignore %target
+      goto survey
+    }
+
+    ; Check if our target is too far away.
+    call library.euo journal %j That_is_too_far
+
+    ; Count the attempt and restart the pursue if it is.
+    if #result = #true
+    {
+      call library.euo debug Target is too far away.
+      set %attempts %attempts + 1
+      set %taming #false
+      goto pursue
+    }
+
+    ; Check if we have line of sight.
+    call library.euo journal %j Target_cannot_be_seen
+
+    ; Count the attempt and restart the pursue if we don't.
+    if #result = #true
+    {
+      call library.euo debug No line of sight.
+      set %attempts %attempts + 1
+      set %taming #false
+      goto pursue
+    }
+  }
+  else
+  {
+    ; Check if we have clear path to the target.
+    call library.euo journal %j clear_path_to_the_animal
+
+    ; Try again if we don't.
+    if #result = #true
+    {
+      call library.euo debug Target moved too far away.
+      set %attempts %attempts + 1
+      set %taming #false
+      goto pursue
+    }
+
+    ; Check if we failed to tame the creature.
+    call library.euo journal %j You_fail_to_tame
+
+    ; Try again if we have.
+    if #result = #true
+    {
+      call library.euo debug Failed.
+      set %taming #false
+      goto pursue
+    }
+
+    ; Check if we have recently tamed this creature.
+    call library.euo journal %j even_challenging
+
+    ; Release the creature and bail if we have.
+    if #result = #true
+    {
+      call library.euo debug Taming a creature twice doesn't yield skill points.
+      gosub release %target
+      gosub ignore %target
+      goto survey
+    }
+
+    ; Check if we have succeeded.
+    call library.euo journal %j accept_you_as_master
+
+    ; Release the creature and start surveying again if we have.
+    if #result = #true
+    {
+      call library.euo debug Done!
+      gosub release %target
+      gosub ignore %target
+      goto survey
+    }
+  }
+
+  ; Keep following the creature.
+  goto pursue
+
+halt
+
+;
+; Release pet.
+;
+sub release
+  ; Use packet rename pet event
+  exevent renamepet %1 meme
+
+  ; Use new name to release it
+  msg meme release$
+
+  ; Wait and respond to release confirmation gump
+  call library.euo waitforsysvars contsize = 270_120 contname = generic_gump
+
+  set %x #contposx + 30
+  set %y #contposy + 90
+
+  ; Click OK
+  click %x %y f
+  return
+
+;
+; Ignore pet and update ignore list.
+;
+sub ignore
+  set *tametame_ignore *tametame_ignore , _ , %1
+  ignoreitem %1
+  return
+
+

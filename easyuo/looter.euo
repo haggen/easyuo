@@ -1,23 +1,21 @@
-; Looter v2.0.1 2014-10-20T20:43:49-02:00
-; more on github.com/haggen/euo
+; Looter v2.1.0 2017-02-03T18:58:33-02:00
+; More on https://github.com/haggen/easyuo
 ;
 ; Purpose:
 ; Loot selected items from corpses based on auto surveying or custom hotkey.
 ;
 ; Depends on:
-; - Library v1.2 [github.com/haggen/euo/Library.euo]
+; - Library v1.3 (https://github.com/haggen/easyuo/library.euo)
 ;
 ; Known issues:
-; - Your maximum weight is not being considered
+; - Your maximum weight is not being considered.
 ;
 ; Roadmap:
-; - Refactor loot table (split into more categories and add missing items)
-; - Remember options from previous sessions
-; - Cut body and leather
+; - Remember options from previous sessions.
 ;
 
 ; Make it fast
-linespercycle 80
+linespercycle 60
 
 ; Define correct namespace
 namespace global Looter
@@ -30,15 +28,15 @@ namespace global Looter
 ; -----------------------------------------------------
 ; auto   -> Automatically survey for corpses around you.
 ; hotkey -> Survey only once whenever the hotkey is pressed.
-set !mode hotkey
+set !mode auto
 
 ; 1. Change the variables below to define a hotkey.
 ; -----------------------------------------------------
 ; CTRL, SHIFT, ALT, or <blank>
 ;
-; A-Z, 0-9, F1-F12, ESC, BACK, TAB, ENTER, PAUSE, 
-; CAPSLOCK, SPACE, PGDN, PGUP, END, HOME, LEFT, 
-; RIGHT, UP, DOWN, PRNSCR, INSERT, DELETE, 
+; A-Z, 0-9, F1-F12, ESC, BACK, TAB, ENTER, PAUSE,
+; CAPSLOCK, SPACE, PGDN, PGUP, END, HOME, LEFT,
+; RIGHT, UP, DOWN, PRNSCR, INSERT, DELETE,
 ; NUMLOCK or SCROLLLOCK
 set !hotkey_m CTRL
 set !hotkey_k A
@@ -49,35 +47,38 @@ set !hotkey_k A
 ; Gold
 set !loot POF_
 
+; Hide, leather and feathers
+set !loot !loot , DEG_JJG_
+
 ; Magery reagents
-set !loot !loot , KZF_SZF_MZF_JUF_RZF_KUF_WZF_
+set !loot !loot , KZF_SZF_MZF_JUF_RZF_KUF_WZF_JZF_
 
 ; Gems, including Arcane Gem
 set !loot !loot , EVF_GVF_ZVF_BVF_RVF_HVF_VVF_JSL_UVF_NVF_
 
-; Bags, backpacks and other containers
-set !loot !loot , ZJF_LKF_CKF_YKK_
+; Musical instruments
+set !loot !loot , OQF_LQF_PRF_KRF_MQF_QRF_RGP_PGP_
 
-; Swords and axes
-set !loot !loot , YPO_BNF_CPH_INF_FSF_OSF_ASF_HNF_FMH_CNF_LSF_NSF_ISF_SMH_RMH_CSF_ZRF_MPH_LPH_MSF_BSF_KPO_GUO_KTF_JTF_BPH_EPH_ZSF_ATF_JPH_SOH_POH_NMH_OMH_LPO_ZTO_XTH_YTH_HSF_KSF_NPO_XPO_FUO_JPO_QPF_NPF_KPH_FYG_RHM_SFR_
+; Blades and polearms
+set !loot !loot , FUO_ATF_NPO_JPH_TSF_NMH_VRH_JTF_SOH_BPH_HSF_ZTO_BUO_XTH_OPO_CUO_XRH_GUO_MTF_RRH_
+
+; Blunt weapons and axes
+set !loot !loot , LSF_BSF_NSF_ZRF_RMH_LPH_UOH_VTH_YSF_BUH_AUO_TRH_ZTH_
 
 ; Bows, crossbows and ammunition
 set !loot !loot , WOH_TOH_QPO_SPO_WOH_TOH_JSF_USF_LMH_MMH_QPO_SPO_PPO_RPO_JSF_USF_LMH_MMH_PPO_RPO_JSF_RWF_LNK_FKF_
 
 ; Leather armor
-set !loot !loot , VKH_NJL_QJL_JKH_QKH_DLH_HKH_PKH_SKH_KKH_ELH_PSF_QSK_ATK_ZSK_OSK_YSK_NSK_
-
-; Studded leather armor
-set !loot !loot , ALH_ULH_LLH_YKH_GLH_XKH_FLH_RLH_MLH_SSK_RSK_
+set !loot !loot , VKH_NJL_QJL_JKH_QKH_DLH_HKH_PKH_SKH_KKH_ELH_PSF_QSK_ATK_ZSK_OSK_YSK_NSK_ALH_ULH_LLH_YKH_GLH_XKH_FLH_RLH_MLH_SSK_RSK_
 
 ; Platemail
 set !loot !loot , MSH_LSH_NSH_ISH_HSH_KSH_JSH_USH_WSH_ASH_ESH_GSH_OSH_CSH_
 
 ; Shields
-set !loot !loot , LIK_MIK_CLK_AIK_CIK_LYD_GIK_NIK_ZHK_HLK_BLK_FIK_BIK_OIK_
+set !loot !loot , FIK_GIK_CIK_NIK_AIK_MIK_HLK_CLK_ZHK_BIK_LIK_OIK_BLK_ELK_DLK_KCO_
 
-; Musical instruments
-set !loot !loot , OQF_LQF_PRF_KRF_MQF_QRF_RGP_PGP_
+; Bags, backpacks and other containers
+set !loot !loot , ZJF_LKF_CKF_YKK_
 
 ; 3. Disclose looted items ?
 ; -----------------------------------------------------
@@ -87,95 +88,113 @@ set !disclose #true
 ; END OF CONFIGURATION SECTION - DO NOT EDIT BELOW THIS LINE!
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-; Try to use menu
-call Looter-Menu.euo
+; Try to use menu.
+call looter.menu.euo
 
 idle:
 
-  ; Refresh configuration from menu
-  call Looter-Menu.euo refresh
+  ; Refresh configuration from the options menu.
+  call looter.menu.euo refresh
 
-  ; Assert the lootsack is accessible
+  ; Assert the lootsack is still accessible.
   gosub lootsack
 
-  ; Fork path, if it's in auto mode
-  ; go straigth for survey, listen 
-  ; to hotkey otherwise
+  ; Fork path, if it's in auto mode go straigth to survey.
   if !mode = auto
     goto survey
-  
-loop:
 
+  ; Otherwise check if hotkey's been pressed.
   onhotkey !hotkey_k !hotkey_m
     goto survey
+
+  ; Loop.
   goto idle
 
 survey:
 
-  ; Look for corpses up to 2 tiles away
+  ; Look for corpses up to 2 tiles away.
   finditem YFM_WNF_QNF g_2
 
-  ; If nothing's found, go idle
+  ; If nothing's found, go back to idle.
   if #findcnt = 0
     goto idle
 
-  ; Time the procedure
-  call Library.euo benchmark
+  ; Start timing the procedure.
+  call library.euo benchmark
 
-  ; Point the corpse
+  ; Save the corpse's ID.
   set %corpse #findid
-  event exmsg %corpse 0 28 Corpse
+  event exmsg %corpse 3 26 Corpse...
 
-  ; Open the corpse container in a prectiable position
+  ; Open the corpse container in a predictable position.
   set #nextcposx 50
   set #nextcposy 50
 
-  ; Mark journal position
+  ; Mark the current journal position.
   set %j #jindex
 
+  ; Open the corpse.
   set #lobjectid %corpse
   event macro 17
   wait 10
 
-  ; Abort if you're dead
-  call Library.euo journal %j am_dead
+  ; Abort if you're dead.
+  call library.euo journal %j am_dead
   if #result
     goto idle
 
-  ; Check if we can loot the corpse
-  call Library.euo journal %j criminal_act
+  ; Check if we can loot the corpse.
+  call library.euo journal %j criminal_act
   if #result
   {
-    event exmsg %corpse 0 28 Nope
+    event exmsg %corpse 3 26 Nope.
     ignoreitem %corpse
     goto idle
   }
 
-  ; Restart if the container size doesn't 
-  ; match the size of a corpse container
+  ; Restart if the container size doesn't
+  ; match the size of a corpse container.
   if #contsize <> 144_212
     goto idle
 
-loot:
+  ; Find something sharp in your backpack to skin the corpse.
+  finditem FUO_ATF_NPO_JPH_TSF_NMH_VRH_JTF_SOH_BPH_CNF C_ , #backpackid
 
-  finditem !loot c_ , %corpse
-
-  ; Flag the corpse as empty if no loot is found
+  ; Move on to loot if nothing is found.
   if #findcnt = 0
   {
-    event exmsg %corpse 0 28 Empty
-    ignoreitem %corpse
-    goto idle
+    goto loot
   }
 
-  ; For each item that is found, try to move it into your 
-  ; lootsack, while checking for possible failures
+  ; Use it to skin the corpse otherwise.
+  set #lobjectid #findid
+  event macro 17
+  target 2s
+  set #ltargetid %corpse
+  set #ltargetkind 1
+  event macro 22
+  wait 10
+
+loot:
+
+  ; Look for selected loot in the corpse.
+  finditem !loot c_ , %corpse
+
+  ; If no loot is found, ignore the corpse and move on.
+  if #findcnt = 0
+  {
+    ignoreitem %corpse
+    goto cut
+  }
+
+  ; For each item that is found, try to move it into your
+  ; lootsack, while checking for possible failures.
   while #findindex <= #findcnt
   {
-    ; Try to move the item
-    call Library.euo move #findid *lootsack
+    ; Try to move the item.
+    call library.euo move #findid *lootsack
 
-    ; Check for response messages
+    ; Check for possible outcomes.
     if must_wait_to_perform in #result
       continue
 
@@ -191,21 +210,60 @@ loot:
     if out_of_sight in #result
       goto idle
 
+    ; Disclose the name of the item.
     if !disclose
     {
       event property #findid
       msg #property
     }
 
-    ; Move on to the next item
+    ; Move on to the next item.
     set #findindex #findindex + 1
   }
 
-  call Library.euo benchmark
-  call Library.euo Acquired #findcnt item(s) in #result sec
-  
-  ; Make sure you looted everything
+  ; Make sure you looted everything.
   goto loot
+
+cut:
+
+  ; Find hides in your backpack.
+  finditem DEG C_ , *lootsack
+
+  ; Move on if there isn't any hide.
+  if #findcnt = 0
+  {
+    goto done
+  }
+
+  ; Save the hide.
+  set %hide #findid
+
+  ; Look for a scissors in your backpack.
+  finditem JAG C_ , #backpackid
+
+  ; Move on if there isn't one.
+  if #findcnt = 0
+  {
+    goto done
+  }
+
+  ; Use the scissors to cut the hide.
+  set #lobjectid #findid
+  event macro 17
+  target 2s
+  set #ltargetid %hide
+  set #ltargetkind 1
+  event macro 22
+  wait 10
+
+done:
+
+  ; Reckon the time it took and go back to surveying corpses.
+  call library.euo benchmark
+  event exmsg %corpse 3 26 Done in #result , s
+  goto idle
+
+halt
 
 ; Assert a lootsack is accessible
 sub lootsack
@@ -213,8 +271,8 @@ sub lootsack
 
   if #findcnt = 0
   {
-    event exmsg #charid 0 28 Target lootsack
-    call Library.euo target
+    event exmsg #charid 3 26 Target the lootsack...
+    call library.euo target
     set *lootsack #result
   }
 

@@ -1,0 +1,93 @@
+; TameTame random wanderer v0.0.2 [WIP]
+; by haggen <hagg3n@gmail.com>
+; licensed under http://creativecommons.org/licenses/by/3.0
+; more on http://code.google.com/p/tametame-easyuo-script/
+;
+
+; Define global namespace
+namespace global tametame
+
+; Configure number of steps
+set %steps 6
+
+; Define initial direction
+set %direction w
+
+; Calculate timeout
+set %timeout ( %steps * 75 ) / 100
+set %timeout %timeout , s
+
+walking: ; checkpoint
+
+; If we're currently taming a creature, wait
+if !busy = #true
+{
+  goto waiting
+}
+
+; If we're idle, walk
+gosub move_to %direction %steps %timeout
+
+; Rotate clockwise
+if %direction = w
+{
+  set %direction n
+  goto walking
+}
+if %direction = n
+{
+  set %direction e
+  goto walking
+}
+if %direction = e
+{
+  set %direction s
+  goto walking
+}
+if %direction = s
+{
+  set %direction w
+  goto walking
+}
+
+waiting: ; checkpoint
+
+; Wait a while
+wait 20
+
+; Check if we're done taming
+if !busy = #true
+{
+  goto waiting
+}
+else
+{
+  goto walking
+}
+
+; Move N steps to given direction
+; %1 direction (w, n, e or s)
+; %2 steps
+; %3 timeout of move command
+sub move_to
+  event sysmessage %1 %2 %3
+
+  set %x #charposx
+  set %y #charposy
+  
+  if w = %1
+    set %x %x - %2
+
+  if n = %1
+    set %y %y - %2
+    
+  if e = %1
+    set %x %x + %2
+    
+  if s = %1
+    set %y %y + %2
+    
+  move %x %y 0 %3
+return
+
+

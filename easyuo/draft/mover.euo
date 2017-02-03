@@ -1,0 +1,25 @@
+
+set #lpc 200
+
+set %debug #true
+
+idle:
+  call Library.euo debug Idle
+
+loop:
+  onhotkey INSERT
+    goto target
+  goto loop
+
+target:
+  call Library.euo target
+  set %t #ltargetid
+
+move:
+  call Library.euo move %t #backpackid 0    
+  goto idle
+  
+  
+
+
+
