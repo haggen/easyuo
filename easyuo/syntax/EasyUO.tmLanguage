@@ -37,13 +37,13 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>[0-9]+</string>
+			<string>\b[0-9]+\b</string>
 			<key>name</key>
 			<string>constant.numeric.euo</string>
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(break|call|continue|exit|for|gosub|goto|halt|if|pause|repeat|until|return|stop|while)\b</string>
+			<string>\b(break|call|continue|exit|for|gosub|goto|halt|if|else|pause|repeat|until|return|stop|while)\b</string>
 			<key>name</key>
 			<string>keyword.control.euo</string>
 		</dict>
