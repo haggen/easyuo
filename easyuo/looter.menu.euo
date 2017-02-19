@@ -46,7 +46,7 @@ build:
   menu edit option_15 115 85 165 A
 
   menu check option_1 10 125 270 20 #true Gold
-  set %option_1 POF_
+  set %option_1 POF_CFF_
 
   menu check option_2 10 145 270 20 #true Hide, leather and feathers
   set %option_2 DEG_JJG_

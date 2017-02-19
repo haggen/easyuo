@@ -15,7 +15,7 @@
 ;
 
 ; Make it fast
-linespercycle 60
+linespercycle 40
 
 ; Define correct namespace
 namespace global Looter
@@ -82,7 +82,7 @@ set !loot !loot , ZJF_LKF_CKF_YKK_
 
 ; 3. Disclose looted items ?
 ; -----------------------------------------------------
-set !disclose #true
+set !disclose #false
 
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ; END OF CONFIGURATION SECTION - DO NOT EDIT BELOW THIS LINE!
@@ -157,6 +157,11 @@ survey:
   if #contsize <> 144_212
     goto idle
 
+  ; Skip skinning the corpse.
+  goto loot
+
+skin:
+
   ; Find something sharp in your backpack to skin the corpse.
   finditem FUO_ATF_NPO_JPH_TSF_NMH_VRH_JTF_SOH_BPH_CNF C_ , #backpackid
 
@@ -225,6 +230,9 @@ loot:
   goto loot
 
 cut:
+
+  ; Skip cutting the hide.
+  goto done
 
   ; Find hides in your backpack.
   finditem DEG C_ , *lootsack
